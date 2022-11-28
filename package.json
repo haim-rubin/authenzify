@@ -1,6 +1,6 @@
 {
   "name": "authenzify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "server to manage authentication authorization of users and more",
   "main": "index.js",
   "scripts": {
@@ -29,5 +29,14 @@
   "bugs": {
     "url": "https://github.com/haim-rubin/authenzify/issues"
   },
-  "homepage": "https://github.com/haim-rubin/authenzify#readme"
+  "homepage": "https://github.com/haim-rubin/authenzify#readme",
+  "dependencies": {
+    "fastify": "^4.10.2",
+    "http-status": "^1.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "nodemon": "^2.0.20",
+    "typescript": "^4.9.3"
+  }
 }
