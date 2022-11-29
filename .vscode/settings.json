@@ -1,0 +1,20 @@
+{
+  "explorer.sortOrder": "filesFirst",
+  "explorer.openEditors.visible": 0,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "launch": {
+    "configurations": [],
+    "compounds": []
+  },
+  "javascript.preferences.importModuleSpecifierEnding": "js",
+  "js/ts.implicitProjectConfig.checkJs": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "cSpell.words": ["fastify"]
+}
