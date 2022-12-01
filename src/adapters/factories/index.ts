@@ -7,10 +7,10 @@ export const factory = async (
   configService: ConfigService,
 ): Promise<Services> => {
   //if (configService.storage === 'mongodb') {
-  const iDalUserService = await initMongoDalUsersService({
+  const iDalUsersService = await initMongoDalUsersService({
     uri: configService.uri,
   })
-  const Users = new UsersService(configService, iDalUserService)
+  const Users = new UsersService(configService, iDalUsersService)
   return {
     Users,
   }

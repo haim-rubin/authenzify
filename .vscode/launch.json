@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug First Service",
+      "name": "Debug Authenzify Service",
       "args": [
         "${workspaceFolder}/node_modules/nodemon/bin/nodemon.js",
         "${workspaceFolder}/src/app.ts"
@@ -16,6 +16,7 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },
+
     {
       "type": "node",
       "request": "launch",

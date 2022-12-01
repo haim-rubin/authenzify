@@ -1,10 +1,11 @@
 {
   "name": "authenzify",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "server to manage authentication authorization of users and more",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register **/*-spec.ts"
+    "test": "mocha -r ts-node/register **/*-spec.ts",
+    "build": "rm -rf ./lib && tsc --sourceMap -p ./"
   },
   "repository": {
     "type": "git",

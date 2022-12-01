@@ -1,13 +1,22 @@
+import { type } from 'os'
+
 export interface IUserClean {
   id: String
-  username: String
+  email: String
   firstName: String
   lastName: String
-  email: String
-}
-export interface IUser extends IUserClean {
+  username: String
   isValid: Boolean
   isDeleted: Boolean
+}
+export type TIUserClean = {
+  id: String
+  email: String
+  firstName: String
+  lastName: String
+  username: String
+}
+export interface IUser extends IUserClean {
   password: String
   salt: string
 }

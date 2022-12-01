@@ -6,6 +6,6 @@ export type ModelCollectionPair = {
 }
 
 export type TModelsCollections = {
-  users: { find: Function; findOne: Function }
-  User: { create: Function }
+  users: { find: Function }
+  User: { create: Function; findOne: Function; find: Function }
 }

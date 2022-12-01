@@ -1,16 +1,20 @@
+import { HttpStatusClasses, HttpStatusExtra } from 'http-status'
 import { UsersService } from '../services/users.service'
 
 export type TPassword = string
-export type TUsername = string
+export type TEmail = string
 
 export type TSignUp = {
-  username: TUsername
+  email: TEmail
   password: TPassword
+  firstName?: string
+  lastName?: string
 }
 
 export type THttpError = {
   httpStatusCode: number
   code: string
+  httpStatusText: string | number | HttpStatusClasses | HttpStatusExtra
 }
 
 export type TPasswordInfo = {

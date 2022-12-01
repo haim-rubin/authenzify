@@ -1,11 +1,11 @@
 export const TUser = {
   id: String,
-  username: String,
+  email: String,
   firstName: String,
   lastName: String,
-  email: String,
-  isValid: Boolean,
-  isDeleted: Boolean,
+  username: String,
+  isValid: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false },
   password: String,
   salt: String,
 }

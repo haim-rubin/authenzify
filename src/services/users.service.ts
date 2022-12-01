@@ -7,22 +7,35 @@ import {
   TPasswordInfo,
   TSignUp,
   TUserDetails,
-  TUsername,
+  TEmail,
 } from '../types'
-import { encrypt, getSaltHex } from '../util/ecryption'
+import { encrypt, getSaltHex } from '../util/encryption'
 import { ConfigService } from './config.service'
+import { IUsersServiceEmitter } from '../interfaces/IUsersService'
+import { emitter } from './emitter'
+import { UsersServiceEvents } from '../events/users-service.events'
+import { Model } from 'mongoose'
 
-export class UsersService implements IUsersService {
+export class UsersService implements IUsersService, IUsersServiceEmitter {
   #config
-  #iDalUserService
+  #iDalUsersService
 
-  constructor(config: ConfigService, iDalUserService: IDalUsersService) {
+  constructor(config: ConfigService, iDalUsersService: IDalUsersService) {
     this.#config = config
-    this.#iDalUserService = iDalUserService
+    this.#iDalUsersService = iDalUsersService
+  }
+  onSignUp(onSignUpFunction: Function): void {
+    emitter.addListener(
+      UsersServiceEvents.USER_SIGN_UP,
+      onSignUpFunction as any,
+    )
+  }
+  onSignIn(user: IUserClean): void {
+    throw new Error('Method not implemented.')
   }
 
-  async isUsernamePolicyValid({ username }: { username: TUsername }) {
-    return new RegExp(this.#config.usernamePolicy).test(username)
+  async isUsernamePolicyValid({ email }: { email: TEmail }) {
+    return new RegExp(this.#config.usernamePolicy).test(email)
   }
 
   async isPasswordPolicyValid({ password }: { password: TPassword }) {
@@ -44,16 +57,17 @@ export class UsersService implements IUsersService {
     }
   }
 
-  async create({ username, password, isValid, salt }: TUserDetails) {
-    return this.#iDalUserService.create({ username, password, isValid, salt })
+  async create(userDetails: TUserDetails) {
+    return this.#iDalUsersService.create(userDetails)
   }
 
-  async findOne({ username }: { username: TUsername }): Promise<IUser> {
-    return this.#iDalUserService.findOne({ username })
+  async findOne({ email }: { email: TEmail }): Promise<IUser> {
+    return this.#iDalUsersService.findOne({ email })
   }
 
-  async signUp({ username, password }: TSignUp): Promise<IUserClean> {
-    const usernamePolicyIsValid = await this.isUsernamePolicyValid({ username })
+  async signUp(userDetails: TSignUp): Promise<IUserClean> {
+    const { email, password } = userDetails
+    const usernamePolicyIsValid = await this.isUsernamePolicyValid({ email })
     if (!usernamePolicyIsValid) {
       throw new HttpError(SIGN_UP_ERRORS.INVALID_USERNAME_POLICY)
     }
@@ -63,7 +77,7 @@ export class UsersService implements IUsersService {
       throw new HttpError(SIGN_UP_ERRORS.INVALID_PASSWORD_POLICY)
     }
 
-    const exists = await this.findOne({ username })
+    const exists = await this.findOne({ email })
 
     if (exists) {
       throw new HttpError(SIGN_UP_ERRORS.USER_ALREADY_EXISTS)
@@ -72,13 +86,12 @@ export class UsersService implements IUsersService {
     const encryptedPassword = await this.encrypt({ password })
 
     const user = await this.create({
+      ...userDetails,
       ...encryptedPassword,
-      username,
       isValid: this.#config.verifyUserAuto,
     })
-
     const userClean: IUserClean = user
-
+    emitter.emit(UsersServiceEvents.USER_SIGN_UP, userClean)
     return userClean
   }
 }

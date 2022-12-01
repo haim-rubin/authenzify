@@ -4,6 +4,7 @@ import { connect } from '../databases/mongodb/connection'
 import { IUser, IDalUsersService } from '../../interfaces'
 import { TUserDetails } from '../../types'
 import { TModelsCollections } from '../databases/mongodb/types'
+import { IUserClean } from '../../interfaces/IUser'
 
 export const initMongoDb = async ({
   uri,
@@ -24,21 +25,38 @@ export const initMongoDb = async ({
   return modelsCollections
 }
 
-export class MongoUserService implements IDalUsersService {
+export class MongoUsersService implements IDalUsersService {
   #modelsCollections
 
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
+  find(filter: any): Promise<[IUser]> {
+    return this.#modelsCollections.User.find(filter)
+  }
 
-  findOne({ username }: { username: string }): Promise<IUser> {
-    const user = this.#modelsCollections.users.findOne({ username })
+  findOne({ email }: { email: string }): Promise<IUser> {
+    const user = this.#modelsCollections.User.findOne({ email })
     return user
   }
 
-  create(userDetails: TUserDetails): Promise<IUser> {
-    const user = this.#modelsCollections.User.create(userDetails)
-    return user
+  map(user: any): IUserClean {
+    const { _id, email, firstName, lastName, username, isValid, isDeleted } =
+      user
+    return {
+      email,
+      firstName,
+      lastName,
+      id: _id.toString(),
+      username,
+      isValid,
+      isDeleted,
+    }
+  }
+
+  async create(userDetails: TUserDetails): Promise<IUserClean> {
+    const user = await this.#modelsCollections.User.create(userDetails)
+    return this.map(user.toObject())
   }
 }
 
@@ -48,6 +66,6 @@ export const initMongoDalUsersService = async ({
   uri: string
 }): Promise<IDalUsersService> => {
   const modelsCollections = await initMongoDb({ uri })
-  const iDalUserService = new MongoUserService(modelsCollections)
-  return iDalUserService
+  const iDalUsersService = new MongoUsersService(modelsCollections)
+  return iDalUsersService
 }
