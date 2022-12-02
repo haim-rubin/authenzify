@@ -1,10 +1,10 @@
 {
   "name": "authenzify",
-  "version": "1.0.3",
+  "version": "0.0.3",
   "description": "server to manage authentication authorization of users and more",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register **/*-spec.ts",
+    "test": "mocha -r ts-node/register ./test/**/*.spec.ts",
     "build": "rm -rf ./lib && tsc --sourceMap -p ./"
   },
   "repository": {
@@ -36,6 +36,7 @@
     "cli-logo": "^0.3.0",
     "fastify": "^4.10.2",
     "http-status": "^1.5.3",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.7.3"
   },
   "devDependencies": {

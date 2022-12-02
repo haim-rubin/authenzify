@@ -1,4 +1,11 @@
-import { TEmail, TPassword, TUserDetails, TPasswordInfo } from '../types'
+import {
+  TEmail,
+  TPassword,
+  TUserDetails,
+  TPasswordInfo,
+  TSignUp,
+  TSignInEmail,
+} from '../types'
 import { IUser, IUserClean } from './IUser'
 
 export interface IDalUsersService {
@@ -11,6 +18,8 @@ export interface IUsersService {
   encrypt({ password }: { password: TPassword }): Promise<TPasswordInfo>
   isUsernamePolicyValid({ email }: { email: TEmail }): Promise<Boolean>
   isPasswordPolicyValid({ password }: { password: TPassword }): Promise<Boolean>
+  signUp(userDetails: TSignUp): Promise<IUserClean>
+  signIn(credentials: TSignInEmail): Promise<String>
 }
 
 export interface IUsersServiceEmitter {

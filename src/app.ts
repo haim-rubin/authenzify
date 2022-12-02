@@ -4,7 +4,7 @@ import { IConfig } from './interfaces'
 import { ConfigService } from './services/config.service'
 import { TSignUp } from './types'
 
-export const initApp = async (config: IConfig) => {
+export const usersService = async (config: IConfig) => {
   const configService = new ConfigService(config)
 
   const services = await factory(configService)
@@ -26,6 +26,21 @@ export const initApp = async (config: IConfig) => {
     }
   })
 
+  server.post('/users/sign-in', async (request, reply) => {
+    const { body: userDetails } = request
+    try {
+      const token = await services.Users.signIn(userDetails as TSignUp)
+      return token
+    } catch (error) {
+      const { httpStatusCode, code, httpStatusText } = error as {
+        httpStatusCode: number
+        code: string
+        httpStatusText: string
+      }
+      reply.code(httpStatusCode).send({ code, httpStatusText, httpStatusCode })
+    }
+  })
+
   server.listen({ port: 9090, host: '0.0.0.0' }, (err, address) => {
     if (err) {
       console.error(err)
@@ -33,16 +48,10 @@ export const initApp = async (config: IConfig) => {
     }
     console.log(`Server listening at ${address}`)
   })
+
+  return {
+    server,
+    onSignUp: services.Users.onSignUp.bind(services.Users),
+    onSignUpError: services.Users.onSignUpError.bind(services.Users),
+  }
 }
-
-// const config = {
-//   verifyUserBy: 'AUTO',
-//   passwordPolicy: '',
-//   usernamePolicy: '',
-//   storage: 'mongodb',
-//   uri: 'mongodb://localhost:27017/users-management-test',
-//   saltLength: 32,
-//   privateKey: '',
-// }
-
-// initApp(config)

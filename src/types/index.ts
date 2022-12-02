@@ -11,6 +11,11 @@ export type TSignUp = {
   lastName?: string
 }
 
+export type TSignInEmail = {
+  email: TEmail
+  password: TPassword
+}
+
 export type THttpError = {
   httpStatusCode: number
   code: string
@@ -28,4 +33,8 @@ export interface TUserDetails extends TSignUp, TPasswordInfo {
 
 export type Services = {
   Users: UsersService
+}
+
+export type ServicesEvents = Services & {
+  events: any
 }

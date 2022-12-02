@@ -1,4 +1,5 @@
-import { SIGN_UP_ERRORS } from '../errors/error-codes'
+import { sign } from 'jsonwebtoken'
+import { SIGN_UP_ERRORS, SIGN_IN_ERRORS } from '../errors/error-codes'
 import HttpError from '../errors/HttpError'
 import { IUser, IUserClean } from '../interfaces/IUser'
 import { IUsersService, IDalUsersService } from '../interfaces'
@@ -8,13 +9,14 @@ import {
   TSignUp,
   TUserDetails,
   TEmail,
+  TSignInEmail,
 } from '../types'
-import { encrypt, getSaltHex } from '../util/encryption'
+import { encrypt, getSaltHex, doesPasswordMatch } from '../util/encryption'
 import { ConfigService } from './config.service'
 import { IUsersServiceEmitter } from '../interfaces/IUsersService'
 import { emitter } from './emitter'
 import { UsersServiceEvents } from '../events/users-service.events'
-import { Model } from 'mongoose'
+const algorithm = 'RS512'
 
 export class UsersService implements IUsersService, IUsersServiceEmitter {
   #config
@@ -24,12 +26,61 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
     this.#config = config
     this.#iDalUsersService = iDalUsersService
   }
+  async signIn(credentials: TSignInEmail): Promise<String> {
+    const user = await this.findOne({ email: credentials.email })
+
+    if (!user) {
+      throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
+    }
+
+    const { email, firstName, lastName, username, isValid, isDeleted } = user
+
+    if (isDeleted) {
+      throw new HttpError(SIGN_IN_ERRORS.USER_DELETED)
+    }
+
+    if (!isValid) {
+      throw new HttpError(SIGN_IN_ERRORS.USER_NOT_VERIFIED)
+    }
+
+    const isMatch = await doesPasswordMatch({
+      password: credentials.password,
+      encryptedPassword: user.password,
+      salt: user.salt,
+    })
+
+    if (!isMatch) {
+      throw new HttpError(SIGN_IN_ERRORS.INVALID_USERNAME_OR_PASSWORD)
+    }
+
+    const token = sign(
+      {
+        email,
+        firstName,
+        lastName,
+        username,
+      },
+      this.#config.privateKey,
+      { algorithm },
+    )
+
+    return token
+  }
+
   onSignUp(onSignUpFunction: Function): void {
     emitter.addListener(
       UsersServiceEvents.USER_SIGN_UP,
       onSignUpFunction as any,
     )
   }
+
+  onSignUpError(onSignUpFunction: Function): void {
+    emitter.addListener(
+      UsersServiceEvents.USER_SIGN_UP_ERROR,
+      onSignUpFunction as any,
+    )
+  }
+
   onSignIn(user: IUserClean): void {
     throw new Error('Method not implemented.')
   }
@@ -48,7 +99,7 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
     const passwordEncrypted = await encrypt({
       expression: password,
       salt,
-      privateKey: this.#config.privateKey,
+      passwordPrivateKey: this.#config.passwordPrivateKey,
     })
 
     return {
@@ -66,32 +117,39 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
   }
 
   async signUp(userDetails: TSignUp): Promise<IUserClean> {
-    const { email, password } = userDetails
-    const usernamePolicyIsValid = await this.isUsernamePolicyValid({ email })
-    if (!usernamePolicyIsValid) {
-      throw new HttpError(SIGN_UP_ERRORS.INVALID_USERNAME_POLICY)
+    try {
+      const { email, password } = userDetails
+      const usernamePolicyIsValid = await this.isUsernamePolicyValid({ email })
+      if (!usernamePolicyIsValid) {
+        throw new HttpError(SIGN_UP_ERRORS.INVALID_USERNAME_POLICY)
+      }
+
+      const passwordPolicyIsValid = await this.isPasswordPolicyValid({
+        password,
+      })
+      if (!passwordPolicyIsValid) {
+        throw new HttpError(SIGN_UP_ERRORS.INVALID_PASSWORD_POLICY)
+      }
+
+      const exists = await this.findOne({ email })
+
+      if (exists) {
+        throw new HttpError(SIGN_UP_ERRORS.USER_ALREADY_EXISTS)
+      }
+
+      const encryptedPassword = await this.encrypt({ password })
+
+      const user = await this.create({
+        ...userDetails,
+        ...encryptedPassword,
+        isValid: this.#config.verifyUserAuto,
+      })
+      const userClean: IUserClean = user
+      emitter.emit(UsersServiceEvents.USER_SIGN_UP, userClean)
+      return userClean
+    } catch (error) {
+      emitter.emit(UsersServiceEvents.USER_SIGN_UP_ERROR, error)
+      throw error
     }
-
-    const passwordPolicyIsValid = await this.isPasswordPolicyValid({ password })
-    if (!passwordPolicyIsValid) {
-      throw new HttpError(SIGN_UP_ERRORS.INVALID_PASSWORD_POLICY)
-    }
-
-    const exists = await this.findOne({ email })
-
-    if (exists) {
-      throw new HttpError(SIGN_UP_ERRORS.USER_ALREADY_EXISTS)
-    }
-
-    const encryptedPassword = await this.encrypt({ password })
-
-    const user = await this.create({
-      ...userDetails,
-      ...encryptedPassword,
-      isValid: this.#config.verifyUserAuto,
-    })
-    const userClean: IUserClean = user
-    emitter.emit(UsersServiceEvents.USER_SIGN_UP, userClean)
-    return userClean
   }
 }

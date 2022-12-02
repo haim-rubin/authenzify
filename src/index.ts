@@ -1,1 +1,1 @@
-export { initApp as authenzify } from './app'
+export { usersService } from './app'

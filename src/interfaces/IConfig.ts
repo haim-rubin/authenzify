@@ -5,5 +5,6 @@ export interface IConfig {
   storage: string
   uri: string
   saltLength: number
+  passwordPrivateKey: string
   privateKey: string
 }

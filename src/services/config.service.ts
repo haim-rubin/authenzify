@@ -31,6 +31,10 @@ export class ConfigService {
     return this.#config.saltLength || defaultSaltLength
   }
 
+  get passwordPrivateKey() {
+    return this.#config.passwordPrivateKey
+  }
+
   get privateKey() {
     return this.#config.privateKey
   }
