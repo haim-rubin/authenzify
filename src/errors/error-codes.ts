@@ -1,6 +1,11 @@
 import * as httpStatus from 'http-status'
 
 export const SIGN_UP_ERRORS = {
+  UNKNOWN_ERROR: {
+    httpStatusCode: httpStatus.INTERNAL_SERVER_ERROR,
+    code: 'SIGN_UP.UNKNOWN_ERROR',
+    httpStatusText: httpStatus[httpStatus.INTERNAL_SERVER_ERROR],
+  },
   INVALID_USERNAME_POLICY: {
     httpStatusCode: httpStatus.BAD_REQUEST,
     code: 'SIGN_UP.INVALID_USERNAME_POLICY',
