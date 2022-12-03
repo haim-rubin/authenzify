@@ -24,7 +24,7 @@ export class ConfigService {
   }
 
   get usernamePolicy() {
-    return this.#config.passwordPolicy
+    return this.#config.usernamePolicy
   }
 
   get saltLength() {
@@ -39,11 +39,26 @@ export class ConfigService {
     return this.#config.privateKey
   }
 
+  get publicKey() {
+    return this.#config.publicKey
+  }
+
   get storage() {
     return this.#config.storage
   }
 
   get uri() {
     return this.#config.uri
+  }
+
+  get jwtSignOptions() {
+    return this.#config.jwtOptions
+  }
+
+  get jwtVerifyOptions() {
+    return {
+      ...this.#config.jwtOptions,
+      algorithm: [this.#config.jwtOptions.algorithm],
+    }
   }
 }

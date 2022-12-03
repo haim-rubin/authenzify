@@ -50,10 +50,11 @@ export const doesPasswordMatch = async ({
   password,
   encryptedPassword,
   salt,
+  passwordPrivateKey,
 }): Promise<Boolean> => {
   const encryptedCurrentPassword = await getEncryptedBuffer({
     expression: password,
-    salt,
+    salt: `${salt}${passwordPrivateKey ? passwordPrivateKey : ''}`,
   })
   const isMatch = encryptedCurrentPassword.equals(
     Buffer.from(encryptedPassword, baseFormat),

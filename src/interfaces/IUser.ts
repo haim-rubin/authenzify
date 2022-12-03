@@ -17,6 +17,6 @@ export type TIUserClean = {
   username: String
 }
 export interface IUser extends IUserClean {
-  password: String
+  password: string
   salt: string
 }

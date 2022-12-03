@@ -1,56 +1,40 @@
 import * as assert from 'assert'
-import * as fs from 'fs'
 import { before } from 'mocha'
-import * as path from 'path'
 import { usersService } from '../../src/app'
 import { dropDatabase } from '../util/mongodb-util'
-import { ConfigService } from '../../src/services/config.service'
+import { getConfig } from '../util/settings'
 
 describe('Sign up', async () => {
   let server
   before(async () => {
-    const privateKey = fs
-      .readFileSync(path.join(__dirname, '../keys/authenzify-test-key'), {
-        encoding: 'ascii',
-      })
-      .replace(/\\n/gm, '\n')
-    const config = {
-      verifyUserBy: 'AUTO',
-      passwordPolicy: '',
-      usernamePolicy: '',
-      storage: 'mongodb',
-      uri: 'mongodb://localhost:27017/users-management-test-api-sign-up',
-      saltLength: 32,
-      passwordPrivateKey: '',
-      privateKey,
-    }
-    //await dropDatabase(config.uri)
+    const config = await getConfig({ port: 9191 })
+    await dropDatabase(config.uri)
     server = (await usersService(config)).server
   })
 
   describe(`Verify user by 'AUTO'`, () => {
-    it('Should sign up and return verified user', async () => {
+    it('Should test sign up api and return verified user', async () => {
+      const credentials = {
+        email: 'haim3@tictuk.com',
+        password: '1@Ea5S',
+      }
+
       await server
         .inject()
         .post('/users/sign-up')
-        .body({
-          email: 'haim3@tictuk.com',
-          password: '123456',
-        })
+        .body(credentials)
         .end((err, res) => {
           // the .end call will trigger the request
-          debugger
-          console.log(res.payload)
+          const { id, ...data } = res.json()
+          assert.deepEqual(
+            {
+              email: credentials.email,
+              isDeleted: false,
+              isValid: true,
+            },
+            data,
+          )
         })
-
-      // assert.deepEqual(userClean, {
-      //   email: 'haim@tictuk.com',
-      //   firstName: 'Haim',
-      //   lastName: 'Rubin',
-      //   isValid: true,
-      //   isDeleted: false,
-      //   username: undefined,
-      // })
     })
   })
 })

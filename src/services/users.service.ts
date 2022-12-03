@@ -1,4 +1,4 @@
-import { sign } from 'jsonwebtoken'
+import { sign, verify } from 'jsonwebtoken'
 import { SIGN_UP_ERRORS, SIGN_IN_ERRORS } from '../errors/error-codes'
 import HttpError from '../errors/HttpError'
 import { IUser, IUserClean } from '../interfaces/IUser'
@@ -16,16 +16,25 @@ import { ConfigService } from './config.service'
 import { IUsersServiceEmitter } from '../interfaces/IUsersService'
 import { emitter } from './emitter'
 import { UsersServiceEvents } from '../events/users-service.events'
-const algorithm = 'RS512'
 
 export class UsersService implements IUsersService, IUsersServiceEmitter {
-  #config
-  #iDalUsersService
+  #config: ConfigService
+  #iDalUsersService: IDalUsersService
 
   constructor(config: ConfigService, iDalUsersService: IDalUsersService) {
     this.#config = config
     this.#iDalUsersService = iDalUsersService
   }
+
+  verifyToken(token): any {
+    const decoded = verify(
+      token,
+      this.#config.publicKey,
+      this.#config.jwtVerifyOptions,
+    )
+    return decoded
+  }
+
   async signIn(credentials: TSignInEmail): Promise<String> {
     const user = await this.findOne({ email: credentials.email })
 
@@ -47,6 +56,7 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
       password: credentials.password,
       encryptedPassword: user.password,
       salt: user.salt,
+      passwordPrivateKey: this.#config.passwordPrivateKey,
     })
 
     if (!isMatch) {
@@ -61,7 +71,7 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
         username,
       },
       this.#config.privateKey,
-      { algorithm },
+      this.#config.jwtSignOptions,
     )
 
     return token
@@ -144,6 +154,7 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
         ...encryptedPassword,
         isValid: this.#config.verifyUserAuto,
       })
+
       const userClean: IUserClean = user
       emitter.emit(UsersServiceEvents.USER_SIGN_UP, userClean)
       return userClean
