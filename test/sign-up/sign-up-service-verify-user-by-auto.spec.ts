@@ -21,15 +21,15 @@ describe('Sign up', async () => {
       const user = await services.Users.signUp({
         email: 'haim@tictuk.com',
         password: '1@Ea5S',
-        firstName: 'Haim',
-        lastName: 'Rubin',
+        firstName: 'John',
+        lastName: 'Doe',
       })
 
       const { id, ...userClean } = user
       assert.deepEqual(userClean, {
         email: 'haim@tictuk.com',
-        firstName: 'Haim',
-        lastName: 'Rubin',
+        firstName: 'John',
+        lastName: 'Doe',
         isValid: true,
         isDeleted: false,
         username: undefined,

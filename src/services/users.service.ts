@@ -26,6 +26,18 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
     this.#iDalUsersService = iDalUsersService
   }
 
+  doesUsernamePolicyValid({ email }: { email: string }): Promise<Boolean> {
+    return Promise.resolve(this.#config.doesUsernamePolicyValid(email))
+  }
+
+  doesPasswordPolicyValid({
+    password,
+  }: {
+    password: string
+  }): Promise<boolean> {
+    return Promise.resolve(this.#config.doesPasswordPolicyValid(password))
+  }
+
   verifyToken(token): any {
     const decoded = verify(
       token,
@@ -95,14 +107,6 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
     throw new Error('Method not implemented.')
   }
 
-  async isUsernamePolicyValid({ email }: { email: TEmail }) {
-    return new RegExp(this.#config.usernamePolicy).test(email)
-  }
-
-  async isPasswordPolicyValid({ password }: { password: TPassword }) {
-    return new RegExp(this.#config.passwordPolicy).test(password)
-  }
-
   async encrypt({ password }: { password: TPassword }): Promise<TPasswordInfo> {
     const salt = getSaltHex(this.#config.saltLength)
 
@@ -129,14 +133,17 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
   async signUp(userDetails: TSignUp): Promise<IUserClean> {
     try {
       const { email, password } = userDetails
-      const usernamePolicyIsValid = await this.isUsernamePolicyValid({ email })
+      const usernamePolicyIsValid = await this.#config.doesUsernamePolicyValid(
+        email,
+      )
       if (!usernamePolicyIsValid) {
         throw new HttpError(SIGN_UP_ERRORS.INVALID_USERNAME_POLICY)
       }
 
-      const passwordPolicyIsValid = await this.isPasswordPolicyValid({
+      const passwordPolicyIsValid = await this.#config.doesPasswordPolicyValid(
         password,
-      })
+      )
+
       if (!passwordPolicyIsValid) {
         throw new HttpError(SIGN_UP_ERRORS.INVALID_PASSWORD_POLICY)
       }

@@ -16,8 +16,12 @@ export interface IDalUsersService {
 
 export interface IUsersService {
   encrypt({ password }: { password: TPassword }): Promise<TPasswordInfo>
-  isUsernamePolicyValid({ email }: { email: TEmail }): Promise<Boolean>
-  isPasswordPolicyValid({ password }: { password: TPassword }): Promise<Boolean>
+  doesUsernamePolicyValid({ email }: { email: TEmail }): Promise<Boolean>
+  doesPasswordPolicyValid({
+    password,
+  }: {
+    password: TPassword
+  }): Promise<Boolean>
   signUp(userDetails: TSignUp): Promise<IUserClean>
   signIn(credentials: TSignInEmail): Promise<String>
 }

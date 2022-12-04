@@ -10,21 +10,25 @@ const defaultSaltLength = 32
 
 export class ConfigService {
   #config
+  #passwordPolicyRegex: RegExp
+  #usernamePolicyRegex: RegExp
 
   constructor(config: IConfig) {
     this.#config = config
+    this.#passwordPolicyRegex = new RegExp(config.passwordPolicy)
+    this.#usernamePolicyRegex = new RegExp(config.usernamePolicy)
   }
 
   get verifyUserAuto() {
     return this.#config.verifyUserBy === VERIFY_USER_BY.AUTO
   }
 
-  get passwordPolicy() {
-    return this.#config.passwordPolicy
+  get doesUsernamePolicyValid() {
+    return this.#usernamePolicyRegex.test.bind(this.#usernamePolicyRegex)
   }
 
-  get usernamePolicy() {
-    return this.#config.usernamePolicy
+  get doesPasswordPolicyValid() {
+    return this.#passwordPolicyRegex.test.bind(this.#passwordPolicyRegex)
   }
 
   get saltLength() {
