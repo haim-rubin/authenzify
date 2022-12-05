@@ -6,15 +6,24 @@ const VERIFY_USER_BY = {
   CODE: 'CODE',
 }
 
+const defaultConfig = {
+  verifyUserBy: 'AUTO',
+  storage: 'mongodb',
+  uri: 'mongodb://localhost:27017/authenzify-users-management',
+  saltLength: 32,
+  authorizationCookieKey: 'Authorization',
+  setCookieOnSignIn: true,
+}
+
 const defaultSaltLength = 32
 
 export class ConfigService {
-  #config
+  #config: IConfig
   #passwordPolicyRegex: RegExp
   #usernamePolicyRegex: RegExp
 
   constructor(config: IConfig) {
-    this.#config = config
+    this.#config = { ...defaultConfig, ...config }
     this.#passwordPolicyRegex = new RegExp(config.passwordPolicy)
     this.#usernamePolicyRegex = new RegExp(config.usernamePolicy)
   }
@@ -64,5 +73,13 @@ export class ConfigService {
       ...this.#config.jwtOptions,
       algorithm: [this.#config.jwtOptions.algorithm],
     }
+  }
+
+  get authorizationCookieKey() {
+    return this.#config.authorizationCookieKey
+  }
+
+  get setCookieOnSignIn() {
+    return this.#config.setCookieOnSignIn
   }
 }

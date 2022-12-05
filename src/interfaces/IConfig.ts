@@ -17,4 +17,6 @@ export interface IConfig {
   }
   host: string
   port: number
+  authorizationCookieKey: string
+  setCookieOnSignIn: boolean
 }

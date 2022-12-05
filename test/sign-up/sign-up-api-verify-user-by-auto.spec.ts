@@ -1,5 +1,5 @@
 import * as assert from 'assert'
-import { before } from 'mocha'
+import { before, after } from 'mocha'
 import { usersService } from '../../src/app'
 import { dropDatabase } from '../util/mongodb-util'
 import { getConfig } from '../util/settings'
@@ -7,7 +7,7 @@ import { getConfig } from '../util/settings'
 describe('Sign up', async () => {
   let server
   before(async () => {
-    const config = await getConfig({ port: 9191 })
+    const config = await getConfig({ port: 9192 })
     await dropDatabase(config.uri)
     server = (await usersService(config)).server
   })
@@ -15,26 +15,15 @@ describe('Sign up', async () => {
   describe(`Verify user by 'AUTO'`, () => {
     it('Should test sign up api and return verified user', async () => {
       const credentials = {
-        email: 'haim3@tictuk.com',
+        email: 'haim3@domain.com',
         password: '1@Ea5S',
       }
 
-      await server
-        .inject()
-        .post('/users/sign-up')
-        .body(credentials)
-        .end((err, res) => {
-          // the .end call will trigger the request
-          const { id, ...data } = res.json()
-          assert.deepEqual(
-            {
-              email: credentials.email,
-              isDeleted: false,
-              isValid: true,
-            },
-            data,
-          )
-        })
+      const res = await server.inject().post('/users/sign-up').body(credentials)
+
+      const { id, ...data } = res.json()
+
+      assert.deepEqual({ email: credentials.email }, data)
     })
   })
 })

@@ -1,6 +1,6 @@
 {
   "name": "authenzify",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "server to manage authentication authorization of users and more",
   "main": "./lib/index.js",
   "scripts": {
@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/haim-rubin/authenzify#readme",
   "dependencies": {
+    "@fastify/cookie": "^8.3.0",
     "@types/mongoose": "^5.11.97",
     "cli-logo": "^0.3.0",
     "fastify": "^4.10.2",

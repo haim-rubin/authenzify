@@ -23,6 +23,10 @@ class HttpError extends Error {
       Error.captureStackTrace(this, this.constructor)
     }
   }
+
+  static isInstanceOf(instance: any): boolean {
+    return instance instanceof HttpError
+  }
 }
 
 export default HttpError

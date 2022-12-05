@@ -16,6 +16,7 @@ import { ServicesEvents } from '../../src/types'
 describe('Sign In', () => {
   let services: ServicesEvents
   let config: IConfig
+  const credentials = { email: 'haim@domain.com', password: '1@Ea5S' }
 
   before(async () => {
     config = await getConfig()
@@ -23,18 +24,15 @@ describe('Sign In', () => {
     const configService = new ConfigService(config)
 
     services = await factory(configService)
+    await services.Users.signUp({
+      ...credentials,
+      firstName: 'John',
+      lastName: 'Doe',
+    })
   })
 
   describe(`Verify user by 'AUTO'`, () => {
     it('Should test Users.signIn verify token', async () => {
-      const credentials = { email: 'haim@tictuk.com', password: '1@Ea5S' }
-
-      await services.Users.signUp({
-        ...credentials,
-        firstName: 'John',
-        lastName: 'Doe',
-      })
-
       const token = await services.Users.signIn(credentials)
       const { verifyToken } = initVerifyToken({
         publicKey: config.publicKey,

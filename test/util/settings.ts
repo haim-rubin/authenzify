@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import { IConfig } from '../../src/interfaces'
 
 export const getConfig = async (configOption?: any) => {
   const privateKey = fs.readFileSync(
@@ -16,7 +17,7 @@ export const getConfig = async (configOption?: any) => {
     },
   )
 
-  const config = {
+  const config: IConfig = {
     verifyUserBy: 'AUTO',
     passwordPolicy: '^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$',
     usernamePolicy: '',
@@ -33,7 +34,9 @@ export const getConfig = async (configOption?: any) => {
       expiresIn: '12h',
       algorithm: 'RS256',
     },
+    authorizationCookieKey: 'Authorization',
     ...configOption,
+    setCookieOnSignIn: true,
   }
   return config
 }

@@ -6,10 +6,11 @@ import {
   TSignUp,
   TSignInEmail,
 } from '../types'
-import { IUser, IUserClean } from './IUser'
+import { IUser, IUserClean, IUserMinimal } from './IUser'
 
 export interface IDalUsersService {
   findOne({ email }: { email: TEmail }): Promise<IUser>
+  findById({ id }: { id: string }): Promise<IUser>
   create(user: TUserDetails): Promise<IUserClean>
   find(filter: any): Promise<[IUser]>
 }
@@ -22,7 +23,7 @@ export interface IUsersService {
   }: {
     password: TPassword
   }): Promise<Boolean>
-  signUp(userDetails: TSignUp): Promise<IUserClean>
+  signUp(userDetails: TSignUp): Promise<IUserMinimal>
   signIn(credentials: TSignInEmail): Promise<String>
 }
 

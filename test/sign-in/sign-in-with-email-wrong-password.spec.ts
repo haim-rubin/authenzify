@@ -12,26 +12,25 @@ import { before } from 'mocha'
 
 describe('Sign In', () => {
   let services
+  const credentials = {
+    email: 'haim@domain.com',
+    password: '1@Ea5S',
+  }
+
   before(async () => {
     const config = await getConfig()
     await dropDatabase(config.uri)
     const configService = new ConfigService(config)
     services = await factory(configService)
+    await services.Users.signUp({
+      ...credentials,
+      firstName: 'John',
+      lastName: 'Doe',
+    })
   })
 
   describe(`Verify user sign-in`, () => {
     it('Should throw error when trying sign-in with wrong password', async () => {
-      const credentials = {
-        email: 'haim@tictuk.com',
-        password: '1@Ea5S',
-      }
-
-      await services.Users.signUp({
-        ...credentials,
-        firstName: 'John',
-        lastName: 'Doe',
-      })
-
       try {
         await services.Users.signIn({
           ...credentials,

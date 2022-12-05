@@ -1,7 +1,7 @@
 import { sign, verify } from 'jsonwebtoken'
 import { SIGN_UP_ERRORS, SIGN_IN_ERRORS } from '../errors/error-codes'
 import HttpError from '../errors/HttpError'
-import { IUser, IUserClean } from '../interfaces/IUser'
+import { IUser, IUserClean, IUserMinimal } from '../interfaces/IUser'
 import { IUsersService, IDalUsersService } from '../interfaces'
 import {
   TPassword,
@@ -17,6 +17,11 @@ import { IUsersServiceEmitter } from '../interfaces/IUsersService'
 import { emitter } from './emitter'
 import { UsersServiceEvents } from '../events/users-service.events'
 
+const mapToMinimal = (user: IUserClean): IUserMinimal => {
+  const { username, firstName, lastName, email, id } = user
+  const userMinimal: IUserMinimal = { username, firstName, lastName, email, id }
+  return userMinimal
+}
 export class UsersService implements IUsersService, IUsersServiceEmitter {
   #config: ConfigService
   #iDalUsersService: IDalUsersService
@@ -47,14 +52,15 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
     return decoded
   }
 
-  async signIn(credentials: TSignInEmail): Promise<String> {
+  async signIn(credentials: TSignInEmail): Promise<string> {
     const user = await this.findOne({ email: credentials.email })
 
     if (!user) {
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
     }
 
-    const { email, firstName, lastName, username, isValid, isDeleted } = user
+    const { id, email, firstName, lastName, username, isValid, isDeleted } =
+      user
 
     if (isDeleted) {
       throw new HttpError(SIGN_IN_ERRORS.USER_DELETED)
@@ -77,6 +83,7 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
 
     const token = sign(
       {
+        id,
         email,
         firstName,
         lastName,
@@ -130,7 +137,7 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
     return this.#iDalUsersService.findOne({ email })
   }
 
-  async signUp(userDetails: TSignUp): Promise<IUserClean> {
+  async signUp(userDetails: TSignUp): Promise<IUserMinimal> {
     try {
       const { email, password } = userDetails
       const usernamePolicyIsValid = await this.#config.doesUsernamePolicyValid(
@@ -162,12 +169,17 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
         isValid: this.#config.verifyUserAuto,
       })
 
-      const userClean: IUserClean = user
-      emitter.emit(UsersServiceEvents.USER_SIGN_UP, userClean)
+      const userClean: IUserMinimal = mapToMinimal(user)
+      emitter.emit(UsersServiceEvents.USER_SIGN_UP, user)
       return userClean
     } catch (error) {
       emitter.emit(UsersServiceEvents.USER_SIGN_UP_ERROR, error)
       throw error
     }
+  }
+
+  async getUser({ id }: { id: string }): Promise<IUserMinimal> {
+    const user = await this.#iDalUsersService.findById({ id })
+    return mapToMinimal({ ...user })
   }
 }

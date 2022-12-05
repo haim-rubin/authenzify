@@ -9,6 +9,7 @@ export interface IUserClean {
   isValid: Boolean
   isDeleted: Boolean
 }
+
 export type TIUserClean = {
   id: String
   email: String
@@ -19,4 +20,12 @@ export type TIUserClean = {
 export interface IUser extends IUserClean {
   password: string
   salt: string
+}
+
+export interface IUserMinimal {
+  id: String
+  email: String
+  firstName: String
+  lastName: String
+  username: String
 }

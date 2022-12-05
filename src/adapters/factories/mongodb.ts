@@ -26,11 +26,17 @@ export const initMongoDb = async ({
 }
 
 export class MongoUsersService implements IDalUsersService {
-  #modelsCollections
+  #modelsCollections: TModelsCollections
 
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
+
+  async findById({ id }: { id: string }): Promise<IUser> {
+    const user = (await this.#modelsCollections.User.findById(id)).toObject()
+    return { ...user, id: user._id.toString() }
+  }
+
   find(filter: any): Promise<[IUser]> {
     return this.#modelsCollections.User.find(filter)
   }
