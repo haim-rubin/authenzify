@@ -1,28 +1,31 @@
 import * as assert from 'assert'
 import { before } from 'mocha'
-import { factory } from '../../src/adapters/factories'
-import { IConfig } from '../../src/interfaces'
-import { ConfigService } from '../../src/services/config.service'
-import { ServicesEvents } from '../../src/types'
-import { dropDatabase } from '../util/mongodb-util'
-import { getConfig } from '../util/settings'
+import { factory } from '../../../src/adapters/factories'
+import { IConfig } from '../../../src/interfaces'
+import { ConfigService } from '../../../src/services/config.service'
+import { Services } from '../../../src/types'
+import { dropDatabase } from '../../util/mongodb-util'
+import { getConfig } from '../../util/settings'
+import { ACTIVATE_USER_BY } from '../../../src/constant'
 
 describe('Sign up', async () => {
   let config: IConfig
-  let services: ServicesEvents
+  let services: Services
 
   before(async () => {
-    config = await getConfig()
+    config = config = await getConfig({
+      activateUserBy: ACTIVATE_USER_BY.USER_EMAIL,
+    })
     await dropDatabase(config.uri)
     const configService = new ConfigService(config)
 
     services = await factory(configService)
   })
 
-  describe(`Verify user by 'AUTO'`, () => {
+  describe(`Verify user by '${ACTIVATE_USER_BY.USER_EMAIL}'`, () => {
     it('Should sign up and return verified user', async () => {
       const userMinimal = {
-        email: 'haim@domain.com',
+        email: 'haim.rubin@gmail.com',
         firstName: 'John',
         lastName: 'Doe',
       }
@@ -34,7 +37,7 @@ describe('Sign up', async () => {
 
       const { id, ...userClean } = user
       assert.deepEqual(userClean, {
-        email: 'haim@domain.com',
+        email: 'haim.rubin@gmail.com',
         firstName: 'John',
         lastName: 'Doe',
         username: undefined,

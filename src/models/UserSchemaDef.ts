@@ -1,4 +1,4 @@
-export const TUser = {
+export const UserSchemaDef = {
   id: String,
   email: String,
   firstName: String,

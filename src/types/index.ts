@@ -1,5 +1,6 @@
 import { HttpStatusClasses, HttpStatusExtra } from 'http-status'
 import { UsersService } from '../services/users.service'
+import { VerificationsService } from '../services/verifications.service'
 
 export type TPassword = string
 export type TEmail = string
@@ -31,10 +32,21 @@ export interface TUserDetails extends TSignUp, TPasswordInfo {
   isValid: Boolean
 }
 
-export type Services = {
-  Users: UsersService
+export type ServicesEvents = {
+  Users: {
+    onSignUp(onSignUpFunction: Function): void
+    onSignIn(onSignUpFunction: Function): void
+    onSignUpError(onSignUpFunction: Function): void
+  }
 }
 
-export type ServicesEvents = Services & {
-  events: any
+export type Services = {
+  Users: UsersService
+  events: ServicesEvents
+  Verifications: VerificationsService
+}
+
+export type TVerificationDetails = {
+  userId: string
+  type: string
 }

@@ -40,7 +40,8 @@
         "${workspaceFolder}/test/**/*.spec.ts"
       ],
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "internalConsoleOptions": "neverOpen",
+      "envFile": "${workspaceFolder}/test/test.env"
     }
   ]
 }

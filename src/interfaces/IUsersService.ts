@@ -5,14 +5,29 @@ import {
   TPasswordInfo,
   TSignUp,
   TSignInEmail,
+  TVerificationDetails,
 } from '../types'
-import { IUser, IUserClean, IUserMinimal } from './IUser'
+import { IUser, IUserClean, IUserMinimal, IVerification } from './IUser'
 
 export interface IDalUsersService {
   findOne({ email }: { email: TEmail }): Promise<IUser>
   findById({ id }: { id: string }): Promise<IUser>
   create(user: TUserDetails): Promise<IUserClean>
   find(filter: any): Promise<[IUser]>
+}
+
+export interface IDalVerificationsService {
+  findById({ id }): Promise<IVerification>
+  findByUserId({
+    userId,
+    type,
+  }: {
+    userId: string
+    type: string
+  }): Promise<IVerification>
+  findOne({ id, type }: { id: string; type: string }): Promise<IVerification>
+  create(verification: TVerificationDetails): Promise<IVerification>
+  find(filter: any): Promise<[IVerification]>
 }
 
 export interface IUsersService {
@@ -29,5 +44,5 @@ export interface IUsersService {
 
 export interface IUsersServiceEmitter {
   onSignUp(onSignUpFunction: Function): void
-  onSignIn(user: IUserClean): void
+  onSignIn(onSignInFunction: Function): void
 }

@@ -1,21 +1,25 @@
 import * as assert from 'assert'
 import { before, after } from 'mocha'
-import { usersService } from '../../src/app'
-import { dropDatabase } from '../util/mongodb-util'
-import { getConfig } from '../util/settings'
+import { usersService } from '../../../src/app'
+import { dropDatabase } from '../../util/mongodb-util'
+import { getConfig } from '../../util/settings'
+import { ACTIVATE_USER_BY } from '../../../src/constant'
 
 describe('Sign up', async () => {
   let server
   before(async () => {
-    const config = await getConfig({ port: 9192 })
+    const config = await getConfig({
+      activateUserBy: ACTIVATE_USER_BY.USER_EMAIL,
+      port: 9292,
+    })
     await dropDatabase(config.uri)
     server = (await usersService(config)).server
   })
 
-  describe(`Verify user by 'AUTO'`, () => {
+  describe(`Verify user by '${ACTIVATE_USER_BY.USER_EMAIL}'`, () => {
     it('Should test sign up api and return verified user', async () => {
       const credentials = {
-        email: 'haim3@domain.com',
+        email: 'haim@tictuk.com',
         password: '1@Ea5S',
       }
 

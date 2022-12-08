@@ -110,7 +110,7 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
     )
   }
 
-  onSignIn(user: IUserClean): void {
+  onSignIn(onSignInFunction: Function): void {
     throw new Error('Method not implemented.')
   }
 
@@ -166,7 +166,7 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
       const user = await this.create({
         ...userDetails,
         ...encryptedPassword,
-        isValid: this.#config.verifyUserAuto,
+        isValid: this.#config.activateUserAuto,
       })
 
       const userClean: IUserMinimal = mapToMinimal(user)

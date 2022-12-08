@@ -13,4 +13,10 @@ export type TModelsCollections = {
     find: Function
     findById: Function
   }
+  Verification: {
+    create: Function
+    findOne: Function
+    find: Function
+    findById: Function
+  }
 }

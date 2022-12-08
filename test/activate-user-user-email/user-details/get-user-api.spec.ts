@@ -1,21 +1,24 @@
 import * as assert from 'assert'
-import { before, after } from 'mocha'
-import { usersService } from '../../src/app'
-import { decode } from 'jsonwebtoken'
-import { getConfig } from '../util/settings'
-import { ConfigService } from '../../src/services/config.service'
-import { factory } from '../../src/adapters/factories'
-import { ServicesEvents } from '../../src/types'
-import { IUserMinimal } from '../../src/interfaces/IUser'
+import { before } from 'mocha'
+import { usersService } from '../../../src/app'
+import { getConfig } from '../../util/settings'
+import { ConfigService } from '../../../src/services/config.service'
+import { factory } from '../../../src/adapters/factories'
+import { Services } from '../../../src/types'
+import { IUserMinimal } from '../../../src/interfaces/IUser'
+import { ACTIVATE_USER_BY } from '../../../src/constant'
 
 describe('User', async () => {
   let server
-  let services: ServicesEvents
+  let services: Services
   let user: IUserMinimal
   let token
 
   before(async () => {
-    const config = await getConfig()
+    const config = await getConfig({
+      activateUserBy: ACTIVATE_USER_BY.USER_EMAIL,
+      port: 9393,
+    })
     const userMinimal = {
       email: 'haim6@domain.com',
       firstName: 'John',

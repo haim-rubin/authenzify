@@ -33,12 +33,15 @@
   "homepage": "https://github.com/haim-rubin/authenzify#readme",
   "dependencies": {
     "@fastify/cookie": "^8.3.0",
+    "@types/ejs": "^3.1.1",
     "@types/mongoose": "^5.11.97",
     "cli-logo": "^0.3.0",
+    "ejs": "^3.1.8",
     "fastify": "^4.10.2",
     "http-status": "^1.5.3",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.7.3"
+    "mongoose": "^6.7.3",
+    "nodemailer": "^6.8.0"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.18.6",

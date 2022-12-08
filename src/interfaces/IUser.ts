@@ -1,21 +1,21 @@
 import { type } from 'os'
 
 export interface IUserClean {
-  id: String
-  email: String
-  firstName: String
-  lastName: String
-  username: String
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  username: string
   isValid: Boolean
   isDeleted: Boolean
 }
 
 export type TIUserClean = {
-  id: String
-  email: String
-  firstName: String
-  lastName: String
-  username: String
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  username: string
 }
 export interface IUser extends IUserClean {
   password: string
@@ -23,9 +23,16 @@ export interface IUser extends IUserClean {
 }
 
 export interface IUserMinimal {
-  id: String
-  email: String
-  firstName: String
-  lastName: String
-  username: String
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  username: string
+}
+
+export interface IVerification {
+  id: string
+  userId: string
+  type: string
+  isDeleted: boolean
 }
