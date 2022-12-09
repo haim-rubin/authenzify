@@ -1,5 +1,5 @@
 import * as assert from 'assert'
-import { before, after } from 'mocha'
+import { before } from 'mocha'
 import { factory } from '../../../src/adapters/factories'
 import { usersService } from '../../../src/app'
 import { IConfig } from '../../../src/interfaces'
@@ -22,8 +22,8 @@ describe('Sign up', async () => {
     })
     await dropDatabase(config.uri)
     const configService = new ConfigService(config)
-    const users = await factory(configService)
-    await users.Users.signUp(credentials)
+    const usersManagement = await factory(configService)
+    await usersManagement.signUp(credentials)
     server = (await usersService(config)).server
   })
 

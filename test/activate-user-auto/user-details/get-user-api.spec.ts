@@ -4,12 +4,11 @@ import { usersService } from '../../../src/app'
 import { getConfig } from '../../util/settings'
 import { ConfigService } from '../../../src/services/config.service'
 import { factory } from '../../../src/adapters/factories'
-import { Services } from '../../../src/types'
 import { IUserMinimal } from '../../../src/interfaces/IUser'
+import { UsersManagement } from '../../../src/adapters/business-logic/users-management'
 
 describe('User', async () => {
   let server
-  let services: Services
   let user: IUserMinimal
   let token
 
@@ -23,13 +22,13 @@ describe('User', async () => {
 
     const configService = new ConfigService(config)
 
-    const services = await factory(configService)
-    user = await services.Users.signUp({
+    const usersManagement: UsersManagement = await factory(configService)
+    user = await usersManagement.signUp({
       ...userMinimal,
       password: '1@Ea5S',
     })
 
-    token = await services.Users.signIn({
+    token = await usersManagement.signIn({
       email: userMinimal.email,
       password: '1@Ea5S',
     })

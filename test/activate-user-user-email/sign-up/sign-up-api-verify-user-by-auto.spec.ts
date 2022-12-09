@@ -1,5 +1,5 @@
 import * as assert from 'assert'
-import { before, after } from 'mocha'
+import { before } from 'mocha'
 import { usersService } from '../../../src/app'
 import { dropDatabase } from '../../util/mongodb-util'
 import { getConfig } from '../../util/settings'

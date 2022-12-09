@@ -1,4 +1,4 @@
-export const VerificationTypes = Object.freeze({
+export const VERIFICATION_TYPES = Object.freeze({
   SIGN_UP: 'SIGN_UP',
   FORGOT_PASSWORD: 'FORGOT_PASSWORD',
 })

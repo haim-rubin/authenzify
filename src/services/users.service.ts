@@ -13,16 +13,21 @@ import {
 } from '../types'
 import { encrypt, getSaltHex, doesPasswordMatch } from '../util/encryption'
 import { ConfigService } from './config.service'
-import { IUsersServiceEmitter } from '../interfaces/IUsersService'
-import { emitter } from './emitter'
-import { UsersServiceEvents } from '../events/users-service.events'
+
+import { USERS_SERVICE_EVENTS } from '../events/users-service.events'
+import {
+  IUserServiceEncryption,
+  IUserServiceValidation,
+} from '../interfaces/IUsersService'
 
 const mapToMinimal = (user: IUserClean): IUserMinimal => {
   const { username, firstName, lastName, email, id } = user
   const userMinimal: IUserMinimal = { username, firstName, lastName, email, id }
   return userMinimal
 }
-export class UsersService implements IUsersService, IUsersServiceEmitter {
+export class UsersService
+  implements IUsersService, IUserServiceEncryption, IUserServiceValidation
+{
   #config: ConfigService
   #iDalUsersService: IDalUsersService
 
@@ -96,24 +101,6 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
     return token
   }
 
-  onSignUp(onSignUpFunction: Function): void {
-    emitter.addListener(
-      UsersServiceEvents.USER_SIGN_UP,
-      onSignUpFunction as any,
-    )
-  }
-
-  onSignUpError(onSignUpFunction: Function): void {
-    emitter.addListener(
-      UsersServiceEvents.USER_SIGN_UP_ERROR,
-      onSignUpFunction as any,
-    )
-  }
-
-  onSignIn(onSignInFunction: Function): void {
-    throw new Error('Method not implemented.')
-  }
-
   async encrypt({ password }: { password: TPassword }): Promise<TPasswordInfo> {
     const salt = getSaltHex(this.#config.saltLength)
 
@@ -170,10 +157,9 @@ export class UsersService implements IUsersService, IUsersServiceEmitter {
       })
 
       const userClean: IUserMinimal = mapToMinimal(user)
-      emitter.emit(UsersServiceEvents.USER_SIGN_UP, user)
+
       return userClean
     } catch (error) {
-      emitter.emit(UsersServiceEvents.USER_SIGN_UP_ERROR, error)
       throw error
     }
   }

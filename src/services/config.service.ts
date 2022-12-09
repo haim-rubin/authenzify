@@ -89,4 +89,20 @@ export class ConfigService {
   get setCookieOnSignIn() {
     return this.#config.setCookieOnSignIn
   }
+
+  get emailProvider() {
+    return this.#config.emailProvider
+  }
+
+  get clientDomain() {
+    return this.#config.clientDomain
+  }
+
+  get domain() {
+    return this.#config.domain
+  }
+
+  get applicationName() {
+    return this.#config.applicationName
+  }
 }

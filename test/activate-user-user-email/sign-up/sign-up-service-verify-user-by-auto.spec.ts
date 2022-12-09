@@ -3,14 +3,14 @@ import { before } from 'mocha'
 import { factory } from '../../../src/adapters/factories'
 import { IConfig } from '../../../src/interfaces'
 import { ConfigService } from '../../../src/services/config.service'
-import { Services } from '../../../src/types'
 import { dropDatabase } from '../../util/mongodb-util'
 import { getConfig } from '../../util/settings'
 import { ACTIVATE_USER_BY } from '../../../src/constant'
+import { UsersManagement } from '../../../src/adapters/business-logic/users-management'
 
 describe('Sign up', async () => {
   let config: IConfig
-  let services: Services
+  let usersManagement: UsersManagement
 
   before(async () => {
     config = config = await getConfig({
@@ -19,7 +19,7 @@ describe('Sign up', async () => {
     await dropDatabase(config.uri)
     const configService = new ConfigService(config)
 
-    services = await factory(configService)
+    usersManagement = await factory(configService)
   })
 
   describe(`Verify user by '${ACTIVATE_USER_BY.USER_EMAIL}'`, () => {
@@ -30,7 +30,7 @@ describe('Sign up', async () => {
         lastName: 'Doe',
       }
 
-      const user = await services.Users.signUp({
+      const user = await usersManagement.signUp({
         ...userMinimal,
         password: '1@Ea5S',
       })

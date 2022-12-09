@@ -1,10 +1,14 @@
 import { mapMongoDbId } from '../adapters/factories/mongodb/mongodb-util'
+import { VERIFICATION_TYPES } from '../constant'
 import { IVerification } from '../interfaces/IUser'
-import { IDalVerificationsService } from '../interfaces/IUsersService'
+import {
+  IDalVerificationsService,
+  IVerificationsService,
+} from '../interfaces/IUsersService'
 import { TVerificationDetails } from '../types'
 import { ConfigService } from './config.service'
 
-export class VerificationsService {
+export class VerificationsService implements IVerificationsService {
   #iDalVerificationsService: IDalVerificationsService
   #config: ConfigService
 
@@ -16,29 +20,7 @@ export class VerificationsService {
     this.#iDalVerificationsService = iDalVerificationsService
   }
 
-  async findOne({ id, type }): Promise<IVerification> {
-    const verification = await this.#iDalVerificationsService.findOne({
-      id,
-      type,
-    })
-    return mapMongoDbId(verification)
-  }
-
-  async findByUserId({
-    id,
-    type,
-  }: {
-    id: string
-    type: string
-  }): Promise<IVerification> {
-    const verification = await this.#iDalVerificationsService.findOne({
-      id,
-      type,
-    })
-    return mapMongoDbId(verification)
-  }
-
-  async create(
+  async createVerification(
     verificationDetails: TVerificationDetails,
   ): Promise<IVerification> {
     const verification = await this.#iDalVerificationsService.create(
@@ -47,8 +29,35 @@ export class VerificationsService {
     return mapMongoDbId(verification)
   }
 
+  async findOne(filter): Promise<IVerification> {
+    const verification = await this.#iDalVerificationsService.findOne(filter)
+    return mapMongoDbId(verification)
+  }
+
+  async findByUserId({
+    id,
+    type,
+    isDeleted,
+  }: {
+    id: string
+    type: string
+    isDeleted: boolean
+  }): Promise<IVerification> {
+    const verification = await this.#iDalVerificationsService.findOne({
+      id,
+      type,
+      isDeleted,
+    })
+    return mapMongoDbId(verification)
+  }
+
   async find(filter: any): Promise<Array<IVerification>> {
     const verifications = await this.#iDalVerificationsService.find(filter)
     return verifications.map(mapMongoDbId)
+  }
+
+  async delete(id: string) {
+    const verification = await this.#iDalVerificationsService.delete(id)
+    return verification
   }
 }

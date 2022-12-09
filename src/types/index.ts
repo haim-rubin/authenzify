@@ -42,7 +42,6 @@ export type ServicesEvents = {
 
 export type Services = {
   Users: UsersService
-  events: ServicesEvents
   Verifications: VerificationsService
 }
 

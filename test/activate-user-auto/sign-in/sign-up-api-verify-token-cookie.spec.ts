@@ -19,8 +19,8 @@ describe('Sign up', async () => {
     config = await getConfig({ port: 9191 })
     await dropDatabase(config.uri)
     const configService = new ConfigService(config)
-    const users = await factory(configService)
-    await users.Users.signUp(credentials)
+    const usersManagement = await factory(configService)
+    await usersManagement.signUp(credentials)
     server = (await usersService(config)).server
   })
 

@@ -11,7 +11,7 @@ import { before } from 'mocha'
 // ssh-keygen -f authenzify-test-key -e -m PKCS8 > authenzify-test-key.pub
 
 describe('Sign In', () => {
-  let services
+  let usersManagement
   const credentials = {
     email: 'haim@domain.com',
     password: '1@Ea5S',
@@ -21,8 +21,8 @@ describe('Sign In', () => {
     const config = await getConfig()
     await dropDatabase(config.uri)
     const configService = new ConfigService(config)
-    services = await factory(configService)
-    await services.Users.signUp({
+    usersManagement = await factory(configService)
+    await usersManagement.signUp({
       ...credentials,
       firstName: 'John',
       lastName: 'Doe',
@@ -32,7 +32,7 @@ describe('Sign In', () => {
   describe(`Verify user sign-in`, () => {
     it('Should throw error when trying sign-in with wrong password', async () => {
       try {
-        await services.Users.signIn({
+        await usersManagement.signIn({
           ...credentials,
           password: credentials.password + '12',
         })

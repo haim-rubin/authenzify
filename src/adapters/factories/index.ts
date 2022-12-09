@@ -1,22 +1,16 @@
 import { initMongoDalServices } from './mongodb'
 import { UsersService } from '../../services/users.service'
 import { ConfigService } from '../../services/config.service'
-import { Services, ServicesEvents } from '../../types'
+import { Services } from '../../types'
 import { VerificationsService } from '../../services/verifications.service'
-
-const getEvents = ({ Users }: { Users: UsersService }): ServicesEvents => {
-  return {
-    Users: {
-      onSignUp: Users.onSignUp,
-      onSignIn: Users.onSignIn,
-      onSignUpError: Users.onSignUpError,
-    },
-  }
-}
+import {
+  initUsersManagement,
+  UsersManagement,
+} from '../business-logic/users-management'
 
 export const factory = async (
   configService: ConfigService,
-): Promise<Services> => {
+): Promise<UsersManagement> => {
   if (true || configService.storage === 'mongodb') {
     const { iDalUsersService, iDalVerificationsService } =
       await initMongoDalServices({
@@ -30,11 +24,10 @@ export const factory = async (
       iDalVerificationsService,
     )
 
-    const events: ServicesEvents = getEvents({ Users })
-    return {
+    const services: Services = {
       Users,
-      events,
       Verifications,
     }
+    return initUsersManagement({ services, configService })
   }
 }

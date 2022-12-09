@@ -11,6 +11,9 @@ export class MongoVerificationsService implements IDalVerificationsService {
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
+  delete(id: string): Promise<boolean> {
+    throw new Error('Method not implemented.')
+  }
   findByUserId({
     userId,
     type,
