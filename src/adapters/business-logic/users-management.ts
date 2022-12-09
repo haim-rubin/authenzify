@@ -16,7 +16,7 @@ import {
   TSignUp,
   TVerificationDetails,
 } from '../../types'
-import { getEmailNotificationsProvider } from './add-emails-notifications-listeners'
+import { getEmailNotificationsProvider } from '../factories/email-notifications/add-emails-notifications-listeners'
 
 export class UsersManagement
   implements IUsersServiceEmitter, IUsersService, IVerificationsService

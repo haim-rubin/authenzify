@@ -1,9 +1,8 @@
-import { UsersManagement } from './users-management'
-import { loadEmailTemplates } from '../notifications/emails/EmailTemplates'
-import { NodemailerEmailNotifications } from '../notifications/emails/nodemailer/NodemailerEmailNotifications'
-import { IEmailTemplatesRender } from '../notifications/emails/util/types-interfaces'
-import { EmailProvider } from '../../constant'
-import { ConfigService } from '../../services/config.service'
+import { loadEmailTemplates } from '../../notifications/emails/EmailTemplates'
+import { NodemailerEmailNotifications } from '../../notifications/emails/nodemailer/NodemailerEmailNotifications'
+import { IEmailTemplatesRender } from '../../notifications/emails/util/types-interfaces'
+import { EmailProvider } from '../../../constant'
+import { ConfigService } from '../../../services/config.service'
 
 export const getEmailNotificationsProvider = async (
   configService: ConfigService,
