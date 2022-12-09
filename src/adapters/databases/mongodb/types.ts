@@ -12,11 +12,15 @@ export type TModelsCollections = {
     findOne: Function
     find: Function
     findById: Function
+    updateOne: Function
+    startSession: Function
   }
   Verification: {
     create: Function
     findOne: Function
     find: Function
     findById: Function
+    updateOne: Function
   }
+  connection
 }

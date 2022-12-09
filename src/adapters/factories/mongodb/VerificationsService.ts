@@ -21,13 +21,16 @@ export class MongoVerificationsService implements IDalVerificationsService {
     userId: string
     type: string
   }): Promise<IVerification> {
-    return this.#modelsCollections.Verification.findOne({ userId, type })
+    return this.#modelsCollections.Verification.findOne({
+      userId,
+      type,
+    })?.toObject()
   }
 
   async findById({ id }): Promise<IVerification> {
     const verification = (
       await this.#modelsCollections.Verification.findOne({ id })
-    ).toObject()
+    )?.toObject()
 
     return mapMongoDbId(verification)
   }
@@ -36,9 +39,13 @@ export class MongoVerificationsService implements IDalVerificationsService {
     return this.#modelsCollections.Verification.find(filter)
   }
 
-  findOne({ id, type }): Promise<IVerification> {
-    const user = this.#modelsCollections.Verification.findOne({ id, type })
-    return user
+  async findOne({ id, type }): Promise<IVerification> {
+    const user = await this.#modelsCollections.Verification.findOne({
+      id,
+      type,
+    })
+
+    return user?.toObject()
   }
 
   async create(verification: TVerificationDetails): Promise<IVerification> {

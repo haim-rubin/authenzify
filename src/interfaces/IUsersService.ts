@@ -14,6 +14,7 @@ export interface IDalUsersService {
   findById({ id }: { id: string }): Promise<IUser>
   create(user: TUserDetails): Promise<IUserClean>
   find(filter: any): Promise<[IUser]>
+  verifyUser(user: IUser, verification: IVerification): Promise<any>
 }
 
 export interface IDalVerificationsService {
@@ -55,6 +56,7 @@ export interface IUsersService {
   signUp(userDetails: TSignUp): Promise<IUserMinimal>
   signIn(credentials: TSignInEmail): Promise<String>
   getUser({ id }: { id: string }): Promise<IUserMinimal>
+  verifyUser(user: IUser, verification: IVerification): Promise<any>
 }
 
 export interface IVerificationsService {

@@ -33,6 +33,22 @@ export const SIGN_UP_ERRORS = {
     code: 'SIGN_UP.INVALID_ACTION',
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
   },
+
+  VERIFICATION_DELETED: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'SIGN_UP.VERIFICATION_DELETED',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  USER_DELETED: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'SIGN_UP.USER_DELETED',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  USER_DOES_NOT_EXISTS: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'SIGN_UP.USER_DOES_NOT_EXISTS',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
 }
 
 export const SIGN_IN_ERRORS = {

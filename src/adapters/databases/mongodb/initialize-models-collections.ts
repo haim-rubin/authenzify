@@ -17,6 +17,7 @@ export const initModelsCollections = ({
         ...models,
         [key]: model,
         [alias]: collection,
+        connection,
       }
     },
     {},

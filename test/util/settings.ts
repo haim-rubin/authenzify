@@ -17,7 +17,7 @@ export const getConfig = async (configOption?: any) => {
     },
   )
 
-  const templatesBasePath = path.join(__dirname, './email-templates')
+  const templatesBasePath = path.join(__dirname, './templates/email')
 
   const { GMAIL_PASSWORD, GMAIL_USER } = process.env
 

@@ -4,6 +4,7 @@ import { IUserClean, IVerification } from '../../../interfaces/IUser'
 import { IDalVerificationsService } from '../../../interfaces/IUsersService'
 import { TModelsCollections } from '../../databases/mongodb/types'
 import { mapMongoDbId } from './mongodb-util'
+import { userInfo } from 'os'
 
 export class MongoUsersService implements IDalUsersService {
   #modelsCollections: TModelsCollections
@@ -11,9 +12,41 @@ export class MongoUsersService implements IDalUsersService {
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
+  async verifyUser(user: IUser, verification: IVerification): Promise<any> {
+    const session = await this.#modelsCollections.connection.startSession()
+
+    try {
+      // await session.withTransaction(async () => {
+      const userUpdatedRes = await this.#modelsCollections.User.updateOne(
+        { _id: user.id },
+        { isValid: true },
+        { session },
+      )
+
+      const verificationUpdatedRes =
+        await this.#modelsCollections.Verification.updateOne(
+          { _id: verification.id },
+          { isDeleted: true },
+          { session },
+        )
+      //await session.commitTransaction()
+      const userUpdated = await this.#modelsCollections.User.findById(user.id)
+      const verificationUpdated =
+        await this.#modelsCollections.Verification.findById(verification.id)
+      return { userUpdated, verificationUpdated }
+      //})
+    } catch (error) {
+      //await session.abortTransaction()
+      throw error
+    }
+  }
+  async getTransaction(): Promise<any> {
+    const transaction = await this.#modelsCollections.User.startSession()
+    return transaction
+  }
 
   async findById({ id }: { id: string }): Promise<IUser> {
-    const user = (await this.#modelsCollections.User.findById(id)).toObject()
+    const user = (await this.#modelsCollections.User.findById(id))?.toObject()
     return mapMongoDbId(user)
   }
 

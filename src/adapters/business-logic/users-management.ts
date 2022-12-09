@@ -2,7 +2,7 @@ import { VERIFICATION_TYPES } from '../../constant'
 import { SIGN_UP_ERRORS } from '../../errors/error-codes'
 import HttpError from '../../errors/HttpError'
 import { USERS_SERVICE_EVENTS } from '../../events/users-service.events'
-import { IUserMinimal, IVerification } from '../../interfaces/IUser'
+import { IUser, IUserMinimal, IVerification } from '../../interfaces/IUser'
 import {
   IUsersService,
   IUsersServiceEmitter,
@@ -16,7 +16,7 @@ import {
   TSignUp,
   TVerificationDetails,
 } from '../../types'
-import { getEmailNotificationsProvider } from '../factories/email-notifications/add-emails-notifications-listeners'
+import { addEmailsNotificationsListeners } from '../factories/email-notifications/add-emails-notifications-listeners'
 
 export class UsersManagement
   implements IUsersServiceEmitter, IUsersService, IVerificationsService
@@ -33,31 +33,9 @@ export class UsersManagement
     this.#services = services
     this.#configService = configService
   }
-  //#region email-notifications
-  #addEmailsNotificationsListeners = async () => {
-    const emailNotifications = await getEmailNotificationsProvider(
-      this.#configService,
-    )
-    if (
-      emailNotifications &&
-      (this.#configService.activateUserByEmail ||
-        this.#configService.activateUserByAdmin)
-    ) {
-      this.onSignUp(async (user) => {
-        const { id } = user
-
-        const verification = await this.createVerification({
-          userId: id,
-          type: VERIFICATION_TYPES.SIGN_UP,
-        })
-
-        await emailNotifications.sendActivationMail(user, verification)
-      })
-    }
-  }
-  //#endregion email-notifications
-  async init() {
-    await this.#addEmailsNotificationsListeners()
+  async verifyUser(user: IUser, verification: IVerification): Promise<any> {
+    const res = await this.#services.Users.verifyUser(user, verification)
+    return res
   }
 
   createVerification(
@@ -94,7 +72,7 @@ export class UsersManagement
 
   verifyActivation = async (verificationId: string): Promise<boolean> => {
     const verification = await this.#services.Verifications.findOne({
-      id: verificationId,
+      _id: verificationId,
       type: VERIFICATION_TYPES.SIGN_UP,
       isDeleted: false,
     })
@@ -103,8 +81,24 @@ export class UsersManagement
       throw new HttpError(SIGN_UP_ERRORS.INVALID_ACTION)
     }
 
+    if (verification.isDeleted) {
+      throw new HttpError(SIGN_UP_ERRORS.INVALID_ACTION)
+    }
+
     const user = await this.#services.Users.getUser({ id: verification.userId })
 
+    if (!user) {
+      throw new HttpError(SIGN_UP_ERRORS.USER_DOES_NOT_EXISTS)
+    }
+
+    if (user.isDeleted) {
+      throw new HttpError(SIGN_UP_ERRORS.USER_DOES_NOT_EXISTS)
+    }
+
+    const res = await this.#services.Users.verifyUser(
+      user as IUser,
+      verification,
+    )
     return true
   }
 
@@ -139,6 +133,7 @@ export const initUsersManagement = async ({
     configService,
   })
 
-  await usersManagement.init()
+  await addEmailsNotificationsListeners({ configService, usersManagement })
+
   return usersManagement
 }

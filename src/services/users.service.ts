@@ -1,7 +1,12 @@
 import { sign, verify } from 'jsonwebtoken'
 import { SIGN_UP_ERRORS, SIGN_IN_ERRORS } from '../errors/error-codes'
 import HttpError from '../errors/HttpError'
-import { IUser, IUserClean, IUserMinimal } from '../interfaces/IUser'
+import {
+  IUser,
+  IUserClean,
+  IUserMinimal,
+  IVerification,
+} from '../interfaces/IUser'
 import { IUsersService, IDalUsersService } from '../interfaces'
 import {
   TPassword,
@@ -14,15 +19,22 @@ import {
 import { encrypt, getSaltHex, doesPasswordMatch } from '../util/encryption'
 import { ConfigService } from './config.service'
 
-import { USERS_SERVICE_EVENTS } from '../events/users-service.events'
 import {
   IUserServiceEncryption,
   IUserServiceValidation,
 } from '../interfaces/IUsersService'
 
-const mapToMinimal = (user: IUserClean): IUserMinimal => {
-  const { username, firstName, lastName, email, id } = user
-  const userMinimal: IUserMinimal = { username, firstName, lastName, email, id }
+const mapToMinimal = (user: IUserClean): IUserClean => {
+  const { username, firstName, lastName, email, id, isDeleted, isValid } = user
+  const userMinimal: IUserClean = {
+    username,
+    firstName,
+    lastName,
+    email,
+    id,
+    isDeleted,
+    isValid,
+  }
   return userMinimal
 }
 export class UsersService
@@ -34,6 +46,9 @@ export class UsersService
   constructor(config: ConfigService, iDalUsersService: IDalUsersService) {
     this.#config = config
     this.#iDalUsersService = iDalUsersService
+  }
+  verifyUser(user: IUser, verification: IVerification): Promise<any> {
+    return this.#iDalUsersService.verifyUser(user, verification)
   }
 
   doesUsernamePolicyValid({ email }: { email: string }): Promise<Boolean> {
@@ -164,7 +179,7 @@ export class UsersService
     }
   }
 
-  async getUser({ id }: { id: string }): Promise<IUserMinimal> {
+  async getUser({ id }: { id: string }): Promise<IUserClean> {
     const user = await this.#iDalUsersService.findById({ id })
     return mapToMinimal({ ...user })
   }

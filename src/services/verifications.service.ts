@@ -26,12 +26,14 @@ export class VerificationsService implements IVerificationsService {
     const verification = await this.#iDalVerificationsService.create(
       verificationDetails,
     )
+
     return mapMongoDbId(verification)
   }
 
   async findOne(filter): Promise<IVerification> {
     const verification = await this.#iDalVerificationsService.findOne(filter)
-    return mapMongoDbId(verification)
+
+    return verification ? mapMongoDbId(verification) : verification
   }
 
   async findByUserId({

@@ -94,9 +94,9 @@ export const usersService = async (config: IConfig) => {
       const params = request.params as IParams
       const { id } = params
 
-      const user = await usersManagement.getUser({ id })
+      const verified = await usersManagement.verifyActivation(id)
 
-      reply.send(user)
+      reply.send(verified)
     })
   })
 
