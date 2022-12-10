@@ -36,7 +36,7 @@ export const usersService = async (config: IConfig) => {
       // TODO: log the user/notification
       reply
         .status(SIGN_UP_SUCCEEDED.httpStatusCode)
-        .send({ ...SIGN_UP_SUCCEEDED.httpResponse, email: user.email })
+        .send({ ...SIGN_UP_SUCCEEDED.httpResponse })
     })
   })
 
