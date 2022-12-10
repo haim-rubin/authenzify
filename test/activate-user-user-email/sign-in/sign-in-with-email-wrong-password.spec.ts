@@ -34,7 +34,7 @@ describe('Sign In', () => {
   })
 
   describe(`Verify user sign-in`, () => {
-    it('Should throw error when trying sign-in with wrong password', async () => {
+    it(`Should throw error ${SIGN_IN_ERRORS.USER_NOT_VERIFIED.code} trying sign-in before user verified`, async () => {
       try {
         await usersManagement.signIn({
           ...credentials,
@@ -48,7 +48,7 @@ describe('Sign In', () => {
             code,
             httpStatusText,
           },
-          SIGN_IN_ERRORS.INVALID_USERNAME_OR_PASSWORD,
+          SIGN_IN_ERRORS.USER_NOT_VERIFIED,
         )
       }
     })

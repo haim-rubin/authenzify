@@ -4,6 +4,7 @@ import { usersService } from '../../../src/app'
 import { dropDatabase } from '../../util/mongodb-util'
 import { getConfig } from '../../util/settings'
 import { ACTIVATE_USER_BY } from '../../../src/constant'
+import { SIGN_UP_SUCCEEDED } from '../../../src/api/responses'
 
 describe('Sign up', async () => {
   let server
@@ -22,9 +23,16 @@ describe('Sign up', async () => {
 
       const res = await server.inject().post('/users/sign-up').body(credentials)
 
-      const { id, ...data } = res.json()
+      const { statusCode } = res
+      const msg = res.json()
 
-      assert.deepEqual({ email: credentials.email }, data)
+      assert.deepEqual(
+        { statusCode, msg },
+        {
+          statusCode: SIGN_UP_SUCCEEDED.httpStatusCode,
+          msg: SIGN_UP_SUCCEEDED.httpResponse,
+        },
+      )
     })
   })
 })

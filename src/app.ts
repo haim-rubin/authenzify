@@ -7,6 +7,7 @@ import { TSignUp } from './types'
 import cookie from '@fastify/cookie'
 import { withErrorHandlingReply } from './errors/with-error-reply-handling'
 import { initVerifyToken } from './util/verify-token'
+import { SIGN_UP_SUCCEEDED } from './api/responses'
 
 interface IParams extends RequestGenericInterface {
   id: string
@@ -32,8 +33,10 @@ export const usersService = async (config: IConfig) => {
     })(async () => {
       const { body: userDetails } = request
       const user = await usersManagement.signUp(userDetails as TSignUp)
-
-      reply.send(user)
+      // TODO: log the user/notification
+      reply
+        .status(SIGN_UP_SUCCEEDED.httpStatusCode)
+        .send({ ...SIGN_UP_SUCCEEDED.httpResponse, email: user.email })
     })
   })
 

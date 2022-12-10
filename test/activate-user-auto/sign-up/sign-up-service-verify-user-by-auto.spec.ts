@@ -39,6 +39,8 @@ describe('Sign up', async () => {
         firstName: 'John',
         lastName: 'Doe',
         username: undefined,
+        isDeleted: false,
+        isValid: true,
       })
     })
   })
