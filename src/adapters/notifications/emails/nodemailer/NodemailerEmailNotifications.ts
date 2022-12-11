@@ -65,9 +65,12 @@ export class NodemailerEmailNotifications implements IEmailNotifications {
           lastName: user.lastName || '',
         },
         html: {
-          activationLink: `${this.#constantParams.domain}/users/verify/${
-            verification.id
-          }/activation`,
+          activationLink: `${
+            this.#constantParams.domain
+          }/${this.#constantParams.activationVerificationRoute.replace(
+            new RegExp(':id', 'g'),
+            verification.id,
+          )}`,
         },
       })
       return this.#prepareAndSendEmail(templates, user.email)

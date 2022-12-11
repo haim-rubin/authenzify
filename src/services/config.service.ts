@@ -105,4 +105,8 @@ export class ConfigService {
   get applicationName() {
     return this.#config.applicationName
   }
+
+  get activationVerificationRoute() {
+    return this.#config.activationVerificationRoute
+  }
 }

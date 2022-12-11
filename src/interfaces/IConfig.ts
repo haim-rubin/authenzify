@@ -16,6 +16,7 @@ export type IEmailSettings = INodemailerEmailSettings
 export interface IConfig {
   domain: string
   clientDomain: string
+  activationVerificationRoute: string
   appUrl: string
   onActivationUrl: string
   onForgotPasswordUrl: string

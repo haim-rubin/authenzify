@@ -32,6 +32,7 @@ export interface IConstantParams {
   domain: string
   applicationName: string
   clientDomain: string
+  activationVerificationRoute: string
 }
 
 export interface IEmailInfo extends IEmailTemplate {

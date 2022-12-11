@@ -22,6 +22,8 @@ export const getEmailNotificationsProvider = async (
             clientDomain: configService.clientDomain,
             domain: configService.domain,
             applicationName: configService.applicationName,
+            activationVerificationRoute:
+              configService.activationVerificationRoute,
           },
         )
 

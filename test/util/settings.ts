@@ -24,6 +24,7 @@ export const getConfig = async (configOption?: any) => {
   const config: IConfig = {
     clientDomain: 'http://localhost:9090',
     applicationName: 'Authenzify',
+    activationVerificationRoute: '/users/verify/:id/activation',
     domain: 'http://localhost:9090',
     activateUserBy: 'AUTO',
     passwordPolicy: '^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$',
