@@ -5,7 +5,82 @@ file_version: 1.0.2
 app_version: 0.10.1-3
 ---
 
-Authenzify repository for users management
+### What is this repository for?
+
+*   This repository is a node server for managements users on the back-end side
+    
+*   Configuration:
+    
+    ```
+    const config: IConfig = {
+        clientDomain: 'http://localhost:9090',
+        applicationName: 'Authenzify',
+        activationVerificationRoute:
+          'http://localhost:9090/users/verify/:id/activation',
+        domain: 'http://localhost:9090',
+        activateUserBy: 'AUTO' | 'USER_EMAIL' | 'ADMIN_EMAIL',
+        passwordPolicy: '^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$', // Validate password policy
+        usernamePolicy: '/^[a-z0-9]+$/i', // Validate username policy
+        storage: 'mongodb', //Database to store the data, currently only mongodb supported
+        uri: 'mongodb://localhost:27017/users-management-test-api-sign-up',
+        saltLength: 32, //Salt length for password
+        passwordPrivateKey: '' || 'your-private-key', //Private ke for password
+        privateKey, // This key is for token
+        publicKey, // This key is for token
+        jwtOptions: { //JWT settings
+          issuer: 'Authenzify corp',
+          subject: 'admin@authenzify.com',
+          audience: 'http://authenzify.com',
+          expiresIn: '12h',
+          algorithm: 'RS256',
+        },
+        authorizationCookieKey: 'Authorization',
+        ...configOption,
+        setCookieOnSignIn: true,
+        emailProvider: {
+          provider: 'nodemailer', // Email provider, currently only nodemailer supported
+          settings: {
+            from: 'haim@authenzify.com',
+            host: 'gmail',
+            port: 587,
+            secure: false,
+            auth: { // Email credentials
+              user: GMAIL_USER,
+              pass: GMAIL_PASSWORD,
+            },
+          },
+          emailTemplates: { // Templates for emails, 
+            activation: {
+              from: path.join(templatesBasePath, '/activation', '/from.ejs'),
+              html: path.join(templatesBasePath, '/activation', '/body.html'),
+              subject: path.join(templatesBasePath, '/activation', '/subject.ejs'),
+            },
+            forgotPassword: {
+              from: path.join(templatesBasePath, '/forgot-password', '/from.ejs'),
+              html: path.join(templatesBasePath, '/forgot-password', '/body.html'),
+              subject: path.join(
+                templatesBasePath,
+                '/forgot-password',
+                '/subject.ejs',
+              ),
+            },
+            onVerification: {
+              from: path.join(templatesBasePath, '/on-verification', '/from.ejs'),
+              html: path.join(templatesBasePath, '/on-verification', '/body.html'),
+              subject: path.join(
+                templatesBasePath,
+                '/on-verification',
+                '/subject.ejs',
+              ),
+            },
+          },
+        },
+      }
+    ```
+    
+*   The repository has the following APIs
+    
+    <br/>
 
 <br/>
 
