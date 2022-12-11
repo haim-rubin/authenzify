@@ -116,5 +116,6 @@ export const usersService = async (config: IConfig) => {
 
   return {
     server,
+    usersManagement,
   }
 }
