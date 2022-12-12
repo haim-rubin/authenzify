@@ -54,9 +54,13 @@ export class MongoUsersService implements IDalUsersService {
     return this.#modelsCollections.User.find(filter)
   }
 
-  findOne({ email }: { email: string }): Promise<IUser> {
-    const user = this.#modelsCollections.User.findOne({ email })
-    return user
+  async findOne({ email }: { email: string }): Promise<IUser> {
+    const user = (
+      await this.#modelsCollections.User.findOne({
+        email,
+      })
+    )?.toObject()
+    return user ? mapMongoDbId(user) : user
   }
 
   map(user: any): IUserClean {

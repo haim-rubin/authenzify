@@ -1,13 +1,13 @@
 import fastify, { RequestGenericInterface } from 'fastify'
-import httpStatus = require('http-status')
+import { fastifyRequestContext } from '@fastify/request-context'
 import { factory } from './adapters/factories'
 import { IConfig } from './interfaces'
 import { ConfigService } from './services/config.service'
 import { TSignUp } from './types'
 import cookie from '@fastify/cookie'
 import { withErrorHandlingReply } from './errors/with-error-reply-handling'
-import { initVerifyToken } from './util/verify-token'
 import { SIGN_UP_SUCCEEDED } from './api/responses'
+import { getAuthenticatedInterceptor } from './interceptors'
 
 interface IParams extends RequestGenericInterface {
   id: string
@@ -15,37 +15,41 @@ interface IParams extends RequestGenericInterface {
 
 export const usersService = async (config: IConfig) => {
   const configService = new ConfigService(config)
-
   const usersManagement = await factory(configService)
+  const server = fastify({ logger: true })
 
-  const { verifyToken } = initVerifyToken({
-    publicKey: config.publicKey,
-    jwtOptions: config.jwtOptions,
-  })
-
-  const server = fastify()
   await server.register(cookie)
+  await server.register(fastifyRequestContext, {
+    defaultStoreValues: {
+      userInfo: { id: 'system' },
+    },
+  })
+  const { authenticated } = getAuthenticatedInterceptor(config)
 
-  server.post('/users/sign-up', (request, reply) => {
+  server.post('/users/sign-up', function (request, reply) {
     withErrorHandlingReply({
       reply,
-      log: { info: () => {}, error: () => {} },
+      log: this.log,
     })(async () => {
-      const { body: userDetails } = request
+      const { body } = request
+      const userDetails = body as TSignUp
+      this.log.info(`Sign up user email: '${userDetails.email}'`)
       const user = await usersManagement.signUp(userDetails as TSignUp)
-      // TODO: log the user/notification
+
       reply
         .status(SIGN_UP_SUCCEEDED.httpStatusCode)
         .send({ ...SIGN_UP_SUCCEEDED.httpResponse })
     })
   })
 
-  server.post('/users/sign-in', (request, reply) => {
+  server.post('/users/sign-in', function (request, reply) {
     withErrorHandlingReply({
       reply,
-      log: { info: () => {}, error: () => {} },
+      log: this.log,
     })(async () => {
-      const { body: userDetails } = request
+      const { body } = request
+      const userDetails = body as TSignUp
+      this.log.info(`Sign in user email: '${userDetails.email}'`)
 
       const token = await usersManagement.signIn(userDetails as TSignUp)
 
@@ -60,28 +64,18 @@ export const usersService = async (config: IConfig) => {
     })
   })
 
-  const authenticated = (request, reply, next) => {
-    const { [config.authorizationCookieKey]: Authorization } = request.cookies
-    const verified = verifyToken(Authorization)
-    if (verified) {
-      next()
-    } else {
-      reply.status(httpStatus.UNAUTHORIZED).send({
-        message: httpStatus[httpStatus.UNAUTHORIZED],
-      })
-    }
-  }
-
   server.get(
     '/users/:id',
     { preHandler: [authenticated] },
-    (request, reply) => {
+    function (request, reply) {
       withErrorHandlingReply({
         reply,
-        log: { info: () => {}, error: () => {} },
+        log: this.log,
       })(async () => {
         const params = request.params as IParams
         const { id } = params
+        this.log.info(`Get user by id: '${id}'`)
+
         const user = await usersManagement.getUser({ id })
 
         reply.send(user)
@@ -89,14 +83,31 @@ export const usersService = async (config: IConfig) => {
     },
   )
 
-  server.get('/users/verify/:id/activation', (request, reply) => {
+  server.get(
+    '/users/me',
+    { preHandler: [authenticated] },
+    function (request, reply) {
+      withErrorHandlingReply({
+        reply,
+        log: this.log,
+      })(async () => {
+        const { id } = request.requestContext.get('userInfo')
+        this.log.info(`Get user 'me' by id: '${id}'`)
+        const user = await usersManagement.getUser({ id })
+
+        reply.send(user)
+      })
+    },
+  )
+
+  server.get('/users/verify/:id/activation', function (request, reply) {
     withErrorHandlingReply({
       reply,
-      log: { info: () => {}, error: () => {} },
+      log: this.log,
     })(async () => {
       const params = request.params as IParams
       const { id } = params
-
+      this.log.info(`Verify user by activation id: '${id}'`)
       const verified = await usersManagement.verifyActivation(id)
 
       reply.send(verified)

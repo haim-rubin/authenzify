@@ -6,6 +6,12 @@ export const GENERAL_ERROR = {
   httpStatusText: httpStatus[httpStatus.INTERNAL_SERVER_ERROR],
 }
 
+export const UNAUTHORIZED_ERROR = {
+  httpStatusCode: httpStatus.UNAUTHORIZED,
+  code: `GENERAL.${httpStatus[httpStatus.UNAUTHORIZED]}`,
+  httpStatusText: httpStatus[httpStatus.UNAUTHORIZED],
+}
+
 export const SIGN_UP_ERRORS = {
   UNKNOWN_ERROR: {
     httpStatusCode: httpStatus.INTERNAL_SERVER_ERROR,
