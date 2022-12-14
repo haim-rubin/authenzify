@@ -4,9 +4,9 @@ import {
 } from '../../databases/mongodb/entities/schema'
 import { initModelsCollections } from '../../databases/mongodb/initialize-models-collections'
 import { connect } from '../../databases/mongodb/connection'
-import { IUser, IDalUsersService } from '../../../interfaces'
+import { IDalUsersService } from '../../../interfaces'
 import { TModelsCollections } from '../../databases/mongodb/types'
-import { MongoUsersService } from './UsersService'
+import { MongoUsersService } from './MongoUsersService'
 import { MongoVerificationsService } from './VerificationsService'
 import { IDalVerificationsService } from '../../../interfaces/IUsersService'
 

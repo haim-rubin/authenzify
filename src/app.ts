@@ -8,6 +8,7 @@ import cookie from '@fastify/cookie'
 import { withErrorHandlingReply } from './errors/with-error-reply-handling'
 import { SIGN_UP_SUCCEEDED } from './api/responses'
 import { getAuthenticatedInterceptor } from './interceptors'
+import { UsersManagement } from './adapters/business-logic/users-management'
 
 interface IParams extends RequestGenericInterface {
   id: string
@@ -15,7 +16,7 @@ interface IParams extends RequestGenericInterface {
 
 export const usersService = async (config: IConfig) => {
   const configService = new ConfigService(config)
-  const usersManagement = await factory(configService)
+  const usersManagement: UsersManagement = await factory(configService)
   const server = fastify({ logger: true })
 
   await server.register(cookie)
@@ -59,7 +60,11 @@ export const usersService = async (config: IConfig) => {
       }
 
       reply
-        .setCookie(configService.authorizationCookieKey, token)
+        .setCookie(configService.authorizationCookieKey, token, {
+          path: '/',
+          signed: false,
+          sameSite: true,
+        })
         .send({ token })
     })
   })

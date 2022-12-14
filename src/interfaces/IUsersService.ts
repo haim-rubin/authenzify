@@ -11,7 +11,7 @@ import { IUser, IUserClean, IUserMinimal, IVerification } from './IUser'
 
 export interface IDalUsersService {
   findOne({ email }: { email: TEmail }): Promise<IUser>
-  findById({ id }: { id: string }): Promise<IUser>
+  findById(id: string): Promise<IUser>
   create(user: TUserDetails): Promise<IUserClean>
   find(filter: any): Promise<[IUser]>
   verifyUser(user: IUser, verification: IVerification): Promise<any>
@@ -53,6 +53,9 @@ export interface IUserServiceValidation {
   }): Promise<Boolean>
 }
 export interface IUsersService {
+  findById(id: string): Promise<IUser>
+}
+export interface IUsersManagementService {
   signUp(userDetails: TSignUp): Promise<IUserMinimal>
   signIn(credentials: TSignInEmail): Promise<String>
   getUser({ id }: { id: string }): Promise<IUserMinimal>
@@ -64,6 +67,8 @@ export interface IVerificationsService {
     verificationDetails: TVerificationDetails,
   ): Promise<IVerification>
 }
+
+export interface IUsersVerificationService {}
 
 export interface IUsersServiceEmitter {
   onSignUp(onSignUpFunction: Function): void

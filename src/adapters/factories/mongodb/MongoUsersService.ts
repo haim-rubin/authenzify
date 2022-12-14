@@ -1,10 +1,8 @@
 import { IUser, IDalUsersService } from '../../../interfaces'
-import { TUserDetails, TVerificationDetails } from '../../../types'
+import { TUserDetails } from '../../../types'
 import { IUserClean, IVerification } from '../../../interfaces/IUser'
-import { IDalVerificationsService } from '../../../interfaces/IUsersService'
 import { TModelsCollections } from '../../databases/mongodb/types'
 import { mapMongoDbId } from './mongodb-util'
-import { userInfo } from 'os'
 
 export class MongoUsersService implements IDalUsersService {
   #modelsCollections: TModelsCollections
@@ -45,7 +43,7 @@ export class MongoUsersService implements IDalUsersService {
     return transaction
   }
 
-  async findById({ id }: { id: string }): Promise<IUser> {
+  async findById(id: string): Promise<IUser> {
     const user = (await this.#modelsCollections.User.findById(id))?.toObject()
     return mapMongoDbId(user)
   }
