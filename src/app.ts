@@ -60,6 +60,7 @@ export const usersService = async (config: IConfig) => {
       }
 
       reply
+        .clearCookie(configService.authorizationCookieKey)
         .setCookie(configService.authorizationCookieKey, token, {
           path: '/',
           signed: false,
