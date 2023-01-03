@@ -4,12 +4,12 @@ import { usersService } from '../../../src/app'
 import { getConfig } from '../../util/settings'
 import { ConfigService } from '../../../src/services/config.service'
 import { factory } from '../../../src/adapters/factories'
-import { IUserMinimal } from '../../../src/interfaces/IUser'
+import { IUserClean } from '../../../src/interfaces/IUser'
 import { UsersManagement } from '../../../src/adapters/business-logic/users-management'
 
 describe('User', async () => {
   let server
-  let user: IUserMinimal
+  let user: IUserClean
   let token
 
   before(async () => {

@@ -9,7 +9,7 @@ import { withErrorHandlingReply } from './errors/with-error-reply-handling'
 import { SIGN_UP_SUCCEEDED } from './api/responses'
 import { getAuthenticatedInterceptor } from './interceptors'
 import { UsersManagement } from './adapters/business-logic/users-management'
-
+import { cleanUser } from './util/helpers'
 interface IParams extends RequestGenericInterface {
   id: string
 }
@@ -81,10 +81,9 @@ export const usersService = async (config: IConfig) => {
         const params = request.params as IParams
         const { id } = params
         this.log.info(`Get user by id: '${id}'`)
-
         const user = await usersManagement.getUser({ id })
 
-        reply.send(user)
+        reply.send(cleanUser(user))
       })
     },
   )
@@ -99,9 +98,9 @@ export const usersService = async (config: IConfig) => {
       })(async () => {
         const { id } = request.requestContext.get('userInfo')
         this.log.info(`Get user 'me' by id: '${id}'`)
-        const user = await usersManagement.getUser({ id })
 
-        reply.send(user)
+        const user = await usersManagement.getUser({ id })
+        reply.send(cleanUser(user))
       })
     },
   )

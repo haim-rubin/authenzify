@@ -22,14 +22,6 @@ export interface IUser extends IUserClean {
   salt: string
 }
 
-export interface IUserMinimal {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  username: string
-}
-
 export interface IVerification {
   id: string
   userId: string

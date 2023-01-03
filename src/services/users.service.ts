@@ -1,4 +1,4 @@
-import { IUser, IVerification } from '../interfaces/IUser'
+import { IUser, IUserClean, IVerification } from '../interfaces/IUser'
 import { IUsersService, IDalUsersService } from '../interfaces'
 import { TUserDetails, TEmail, TSignInEmail, TSignUp } from '../types'
 import { ConfigService } from './config.service'
@@ -15,7 +15,7 @@ export class UsersService implements IUsersService {
   findById(id: string): Promise<IUser> {
     return this.#iDalUsersService.findById(id)
   }
-  verifyUser(user: IUser, verification: IVerification): Promise<any> {
+  verifyUser(user: IUserClean, verification: IVerification): Promise<any> {
     return this.#iDalUsersService.verifyUser(user, verification)
   }
 

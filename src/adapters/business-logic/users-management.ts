@@ -3,12 +3,7 @@ import { VERIFICATION_TYPES } from '../../constant'
 import { SIGN_IN_ERRORS, SIGN_UP_ERRORS } from '../../errors/error-codes'
 import HttpError from '../../errors/HttpError'
 import { USERS_SERVICE_EVENTS } from '../../events/users-service.events'
-import {
-  IUser,
-  IUserClean,
-  IUserMinimal,
-  IVerification,
-} from '../../interfaces/IUser'
+import { IUserClean, IVerification } from '../../interfaces/IUser'
 import {
   IUserServiceEncryption,
   IUserServiceValidation,
@@ -92,7 +87,7 @@ export class UsersManagement
     }
   }
 
-  async innerSignUp(userDetails: TSignUp): Promise<IUserMinimal> {
+  async innerSignUp(userDetails: TSignUp): Promise<IUserClean> {
     try {
       const { email, password } = userDetails
       const usernamePolicyIsValid =
@@ -122,7 +117,7 @@ export class UsersManagement
         isValid: this.#configService.activateUserAuto,
       })
 
-      const userClean: IUserMinimal = mapToMinimal(user)
+      const userClean: IUserClean = mapToMinimal(user)
 
       return userClean
     } catch (error) {
@@ -139,7 +134,10 @@ export class UsersManagement
     return decoded
   }
 
-  async verifyUser(user: IUser, verification: IVerification): Promise<any> {
+  async verifyUser(
+    user: IUserClean,
+    verification: IVerification,
+  ): Promise<any> {
     const res = await this.#services.Users.verifyUser(user, verification)
     return res
   }
@@ -150,11 +148,30 @@ export class UsersManagement
     return this.#services.Verifications.createVerification(verificationDetails)
   }
 
-  async getUser({ id }: { id: string }): Promise<IUser> {
-    return this.#services.Users.findById(id)
+  async getUser({ id }: { id: string }): Promise<IUserClean> {
+    const user = await this.#services.Users.findById(id)
+    const {
+      id: uid,
+      email,
+      firstName,
+      lastName,
+      username,
+      isValid,
+      isDeleted,
+    } = user
+
+    return {
+      id: uid,
+      email,
+      firstName,
+      lastName,
+      username,
+      isValid,
+      isDeleted,
+    }
   }
 
-  async signUp(userDetails: TSignUp): Promise<IUserMinimal> {
+  async signUp(userDetails: TSignUp): Promise<IUserClean> {
     try {
       const user = await this.innerSignUp(userDetails)
       emitter.emit(USERS_SERVICE_EVENTS.USER_SIGN_UP, user)
@@ -247,10 +264,7 @@ export class UsersManagement
       throw new HttpError(SIGN_UP_ERRORS.USER_DOES_NOT_EXISTS)
     }
 
-    const res = await this.#services.Users.verifyUser(
-      user as IUser,
-      verification,
-    )
+    const res = await this.#services.Users.verifyUser(user, verification)
     return true
   }
 

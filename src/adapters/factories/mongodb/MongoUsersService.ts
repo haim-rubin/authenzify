@@ -10,7 +10,10 @@ export class MongoUsersService implements IDalUsersService {
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
-  async verifyUser(user: IUser, verification: IVerification): Promise<any> {
+  async verifyUser(
+    user: IUserClean,
+    verification: IVerification,
+  ): Promise<any> {
     const session = await this.#modelsCollections.connection.startSession()
 
     try {
