@@ -134,4 +134,3 @@ build
 *.DS_Store
 .idea/
 ./sequelize/models/*.*
-lib

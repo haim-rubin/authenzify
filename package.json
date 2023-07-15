@@ -1,6 +1,6 @@
 {
   "name": "authenzify",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "server to manage authentication authorization of users and more",
   "main": "./lib/index.js",
   "scripts": {
