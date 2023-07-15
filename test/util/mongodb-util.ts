@@ -1,6 +1,6 @@
 import { connect } from '../../src/adapters/databases/mongodb/connection'
 
-export const dropDatabase = async (uri: string) => {
-  const connection = await connect(uri)
+export const dropDatabase = async (config: any) => {
+  const connection = await connect(config)
   await connection.db.dropDatabase()
 }

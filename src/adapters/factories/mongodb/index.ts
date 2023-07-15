@@ -11,11 +11,11 @@ import { MongoVerificationsService } from './VerificationsService'
 import { IDalVerificationsService } from '../../../interfaces/IUsersService'
 
 export const initMongoDb = async ({
-  uri,
+  config,
 }: {
-  uri: string
+  config: any
 }): Promise<TModelsCollections> => {
-  const connection = await connect(uri)
+  const connection = await connect(config)
   const modelsCollections = initModelsCollections({
     connection,
     modelsInfo: [
@@ -34,14 +34,14 @@ export const initMongoDb = async ({
 }
 
 export const initMongoDalServices = async ({
-  uri,
+  config,
 }: {
-  uri: string
+  config: any
 }): Promise<{
   iDalUsersService: IDalUsersService
   iDalVerificationsService: IDalVerificationsService
 }> => {
-  const modelsCollections = await initMongoDb({ uri })
+  const modelsCollections = await initMongoDb({ config })
   const iDalUsersService = new MongoUsersService(modelsCollections)
   const iDalVerificationsService = new MongoVerificationsService(
     modelsCollections,

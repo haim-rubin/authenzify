@@ -1,6 +1,26 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { IConfig } from '../../src/interfaces'
+import { ACTIVATE_USER_BY } from '../../src/constant'
+
+const cleanQuotes = (value) => {
+  const [start, ...excludeStart] = `${value}`
+  if (start !== '"') {
+    return value
+  }
+  const [end, ...excludeStartEnd] = excludeStart.reverse()
+  return excludeStartEnd.reverse().join('')
+}
+
+const parseEnv = (env) => {
+  return env
+    .split('\n')
+    .map((keyValueString) => keyValueString.split('='))
+    .reduce(
+      (config, [key, value]) => ({ ...config, [key]: cleanQuotes(value) }),
+      {},
+    )
+}
 
 export const getConfig = async (configOption?: any) => {
   const privateKey = fs.readFileSync(
@@ -17,9 +37,13 @@ export const getConfig = async (configOption?: any) => {
     },
   )
 
+  const env = fs.readFileSync(path.join(__dirname, '../../.env'), {
+    encoding: 'ascii',
+  })
+  const envParsed = parseEnv(env)
   const templatesBasePath = path.join(__dirname, './templates/email')
-
-  const { GMAIL_PASSWORD, GMAIL_USER } = process.env
+  cleanQuotes
+  const { GMAIL_PASSWORD, GMAIL_USER } = envParsed
 
   const config: IConfig = {
     clientDomain: 'http://localhost:9090',
@@ -27,11 +51,16 @@ export const getConfig = async (configOption?: any) => {
     activationVerificationRoute:
       'http://localhost:9090/users/verify/:id/activation',
     domain: 'http://localhost:9090',
-    activateUserBy: 'AUTO',
+    activateUserBy: ACTIVATE_USER_BY.AUTO,
     passwordPolicy: '^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$',
     usernamePolicy: '',
-    storage: 'mongodb',
-    uri: 'mongodb://localhost:27017/users-management-test-api-sign-up',
+    storage: {
+      type: 'mongodb',
+      uri: `mongodb://bongo-username:bongo-p2S4W0rD@localhost:27020`,
+      options: {
+        dbName: 'users-management',
+      },
+    },
     saltLength: 32,
     passwordPrivateKey: '' || 'your-private-key',
     privateKey,

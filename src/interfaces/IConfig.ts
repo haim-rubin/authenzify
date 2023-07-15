@@ -25,7 +25,7 @@ export interface IConfig {
   activateUserBy: string
   passwordPolicy: string
   usernamePolicy: string
-  storage: string
+  storage: any
   uri: string
   saltLength: number
   passwordPrivateKey: string
