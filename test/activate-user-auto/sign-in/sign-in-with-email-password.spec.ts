@@ -13,11 +13,13 @@ import { ACTIVATE_USER_BY } from '../../../src/constant'
 
 describe('Sign In', () => {
   let usersManagement
-  const credentials = { email: 'haim@domain.com', password: '1@Ea5S' }
+  const { USER_EMAIL, USER_PASSWORD } = process.env
+  const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
 
   before(async () => {
     const config = await getConfig()
-    await dropDatabase(config.uri)
+    const storageConfig = config.storage
+    await dropDatabase(storageConfig)
     const configService = new ConfigService(config)
 
     usersManagement = await factory(configService)

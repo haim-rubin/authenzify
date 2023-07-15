@@ -30,6 +30,7 @@
         "--colors",
         "${file}"
       ],
+      "envFile": "${workspaceFolder}/.env",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },
@@ -38,6 +39,7 @@
       "request": "launch",
       "name": "Mocha TS All",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-r",
         "ts-node/register",
@@ -47,8 +49,7 @@
         "${workspaceFolder}/test/**/*.spec.ts"
       ],
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "envFile": "${workspaceFolder}/test/test.env"
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }

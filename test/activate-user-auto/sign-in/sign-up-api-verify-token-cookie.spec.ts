@@ -11,13 +11,13 @@ import { ACTIVATE_USER_BY } from '../../../src/constant'
 describe('Sign up', async () => {
   let server
   let config: IConfig
-  const credentials = {
-    email: 'haim4@domain.com',
-    password: '1@Ea5S',
-  }
+  const { USER_EMAIL, USER_PASSWORD } = process.env
+  const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
+
   before(async () => {
     config = await getConfig({ port: 9191 })
-    await dropDatabase(config.uri)
+    const storageConfig = config.storage
+    await dropDatabase(storageConfig)
     const configService = new ConfigService(config)
     const usersManagement = await factory(configService)
     await usersManagement.signUp(credentials)
@@ -29,8 +29,8 @@ describe('Sign up', async () => {
       const res = await server.inject().post('/users/sign-in').body(credentials)
 
       const { token } = res.json()
-      const cookie = res.cookies.find(({ name }) => {
-        return name === config.authorizationCookieKey
+      const cookie = res.cookies.find(({ name, value }) => {
+        return name === config.authorizationCookieKey && value
       })
       assert.equal(cookie?.value, token)
     })

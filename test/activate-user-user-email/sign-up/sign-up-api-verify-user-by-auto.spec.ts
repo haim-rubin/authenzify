@@ -13,16 +13,15 @@ describe('Sign up', async () => {
       activateUserBy: ACTIVATE_USER_BY.USER_EMAIL,
       port: 9292,
     })
-    await dropDatabase(config.uri)
+    const storageConfig = config.storage
+    await dropDatabase(storageConfig)
     server = (await usersService(config)).server
   })
 
   describe(`Verify user by '${ACTIVATE_USER_BY.USER_EMAIL}'`, () => {
     it('Should test sign up api and return verified user', async () => {
-      const credentials = {
-        email: 'haim@tictuk.com',
-        password: '1@Ea5S',
-      }
+      const { USER_EMAIL, USER_PASSWORD } = process.env
+      const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
 
       const res = await server.inject().post('/users/sign-up').body(credentials)
       const { statusCode } = res

@@ -14,7 +14,8 @@ describe('Sign up', async () => {
 
   before(async () => {
     config = await getConfig()
-    await dropDatabase(config.uri)
+    const storageConfig = config.storage
+    await dropDatabase(storageConfig)
     const configService = new ConfigService(config)
 
     usersManagement = await factory(configService)
@@ -22,20 +23,21 @@ describe('Sign up', async () => {
 
   describe(`Verify user by '${ACTIVATE_USER_BY.AUTO}'`, () => {
     it('Should sign up and return verified user', async () => {
+      const { USER_EMAIL, USER_PASSWORD } = process.env
       const userMinimal = {
-        email: 'haim.rubin@gmail.com',
+        email: USER_EMAIL,
         firstName: 'John',
         lastName: 'Doe',
       }
 
       const user = await usersManagement.signUp({
         ...userMinimal,
-        password: '1@Ea5S',
+        password: USER_PASSWORD,
       })
 
       const { id, ...userClean } = user
       assert.deepEqual(userClean, {
-        email: 'haim.rubin@gmail.com',
+        email: USER_EMAIL,
         firstName: 'John',
         lastName: 'Doe',
         username: undefined,

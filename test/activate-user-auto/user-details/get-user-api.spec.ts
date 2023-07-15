@@ -14,8 +14,9 @@ describe('User', async () => {
 
   before(async () => {
     const config = await getConfig()
+    const { USER_EMAIL, USER_PASSWORD } = process.env
     const userMinimal = {
-      email: 'haim6@domain.com',
+      email: USER_EMAIL,
       firstName: 'John',
       lastName: 'Doe',
     }
@@ -25,12 +26,12 @@ describe('User', async () => {
     const usersManagement: UsersManagement = await factory(configService)
     user = await usersManagement.signUp({
       ...userMinimal,
-      password: '1@Ea5S',
+      password: USER_PASSWORD,
     })
 
     token = await usersManagement.signIn({
       email: userMinimal.email,
-      password: '1@Ea5S',
+      password: USER_PASSWORD,
     })
 
     server = (await usersService(config)).server

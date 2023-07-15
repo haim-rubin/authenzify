@@ -8,14 +8,13 @@ import { ACTIVATE_USER_BY } from '../../../src/constant'
 describe('Sign up', async () => {
   let server
   let config
-  const credentials = {
-    email: 'haim@tictuk.com',
-    password: '1@Ea5S',
-  }
+  const { USER_EMAIL, USER_PASSWORD } = process.env
+  const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
   let token
   before(async () => {
     config = await getConfig({ port: 9393 })
-    await dropDatabase(config.uri)
+    const storageConfig = config.storage
+    await dropDatabase(storageConfig)
     server = (await usersService(config)).server
     await server.inject().post('/users/sign-up').body(credentials)
     const res = await server.inject().post('/users/sign-in').body(credentials)
