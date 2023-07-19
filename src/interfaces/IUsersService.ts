@@ -5,9 +5,9 @@ import {
   TPasswordInfo,
   TSignUp,
   TSignInEmail,
-  TVerificationDetails,
 } from '../types'
-import { IUser, IUserClean, IVerification } from './IUser'
+import { IUser, IUserClean } from './IUser'
+import { IVerification } from './IVerificationService'
 
 export interface IDalUsersService {
   findOne({ email }: { email: TEmail }): Promise<IUser>
@@ -15,29 +15,6 @@ export interface IDalUsersService {
   create(user: TUserDetails): Promise<IUserClean>
   find(filter: any): Promise<[IUser]>
   verifyUser(user: IUserClean, verification: IVerification): Promise<any>
-}
-
-export interface IDalVerificationsService {
-  findById({ id, type }: { id: string; type: string }): Promise<IVerification>
-  findByUserId({
-    userId,
-    type,
-  }: {
-    userId: string
-    type: string
-  }): Promise<IVerification>
-  findOne({
-    id,
-    type,
-    isDeleted,
-  }: {
-    id: string
-    type: string
-    isDeleted: boolean
-  }): Promise<IVerification>
-  create(verification: TVerificationDetails): Promise<IVerification>
-  find(filter: any): Promise<[IVerification]>
-  delete(id: string): Promise<boolean>
 }
 
 export interface IUserServiceEncryption {
@@ -52,23 +29,17 @@ export interface IUserServiceValidation {
     password: TPassword
   }): Promise<Boolean>
 }
+
 export interface IUsersService {
   findById(id: string): Promise<IUser>
 }
+
 export interface IUsersManagementService {
   signUp(userDetails: TSignUp): Promise<IUserClean>
   signIn(credentials: TSignInEmail): Promise<String>
   getUser({ id }: { id: string }): Promise<IUserClean>
   verifyUser(user: IUserClean, verification: IVerification): Promise<any>
 }
-
-export interface IVerificationsService {
-  createVerification(
-    verificationDetails: TVerificationDetails,
-  ): Promise<IVerification>
-}
-
-export interface IUsersVerificationService {}
 
 export interface IUsersServiceEmitter {
   onSignUp(onSignUpFunction: Function): void

@@ -1,5 +1,3 @@
-import { type } from 'os'
-
 export interface IUserClean {
   id: string
   email: string
@@ -20,11 +18,4 @@ export type TIUserClean = {
 export interface IUser extends IUserClean {
   password: string
   salt: string
-}
-
-export interface IVerification {
-  id: string
-  userId: string
-  type: string
-  isDeleted: boolean
 }

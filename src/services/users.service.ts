@@ -1,6 +1,7 @@
-import { IUser, IUserClean, IVerification } from '../interfaces/IUser'
+import { IUser, IUserClean } from '../interfaces/IUser'
+import { IVerification } from '../interfaces/IVerificationService'
 import { IUsersService, IDalUsersService } from '../interfaces'
-import { TUserDetails, TEmail, TSignInEmail, TSignUp } from '../types'
+import { TUserDetails, TEmail } from '../types'
 import { ConfigService } from './config.service'
 
 export class UsersService implements IUsersService {

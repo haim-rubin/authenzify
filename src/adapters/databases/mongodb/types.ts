@@ -22,5 +22,21 @@ export type TModelsCollections = {
     findById: Function
     updateOne: Function
   }
+  Permission: {
+    create: Function
+    findOne: Function
+    find: Function
+    findById: Function
+    updateOne: Function
+  }
+
+  PermissionsGroup: {
+    create: Function
+    findOne: Function
+    find: Function
+    findById: Function
+    updateOne: Function
+  }
+
   connection
 }

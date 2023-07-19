@@ -3,14 +3,15 @@ import { VERIFICATION_TYPES } from '../../constant'
 import { SIGN_IN_ERRORS, SIGN_UP_ERRORS } from '../../errors/error-codes'
 import HttpError from '../../errors/HttpError'
 import { USERS_SERVICE_EVENTS } from '../../events/users-service.events'
-import { IUserClean, IVerification } from '../../interfaces/IUser'
+import { IUserClean } from '../../interfaces/IUser'
+import { IVerification } from '../../interfaces/IVerificationService'
 import {
   IUserServiceEncryption,
   IUserServiceValidation,
   IUsersManagementService,
   IUsersServiceEmitter,
-  IVerificationsService,
 } from '../../interfaces/IUsersService'
+import { IVerificationsService } from '../../interfaces/IVerificationService'
 import { ConfigService } from '../../services/config.service'
 import { emitter } from '../../services/emitter'
 import {

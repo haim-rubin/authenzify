@@ -4,11 +4,12 @@ import {
 } from '../../databases/mongodb/entities/schema'
 import { initModelsCollections } from '../../databases/mongodb/initialize-models-collections'
 import { connect } from '../../databases/mongodb/connection'
-import { IDalUsersService } from '../../../interfaces'
+import { IDalPermissionsService, IDalUsersService } from '../../../interfaces'
 import { TModelsCollections } from '../../databases/mongodb/types'
 import { MongoUsersService } from './MongoUsersService'
 import { MongoVerificationsService } from './VerificationsService'
-import { IDalVerificationsService } from '../../../interfaces/IUsersService'
+import { IDalVerificationsService } from '../../../interfaces/IVerificationService'
+import { MongoPermissionsService } from './MongoPermissionsService'
 
 export const initMongoDb = async ({
   config,
@@ -40,11 +41,13 @@ export const initMongoDalServices = async ({
 }): Promise<{
   iDalUsersService: IDalUsersService
   iDalVerificationsService: IDalVerificationsService
+  iDalPermissionsService: IDalPermissionsService
 }> => {
   const modelsCollections = await initMongoDb({ config })
   const iDalUsersService = new MongoUsersService(modelsCollections)
   const iDalVerificationsService = new MongoVerificationsService(
     modelsCollections,
   )
-  return { iDalUsersService, iDalVerificationsService }
+  const iDalPermissionsService = new MongoPermissionsService(modelsCollections)
+  return { iDalUsersService, iDalVerificationsService, iDalPermissionsService }
 }

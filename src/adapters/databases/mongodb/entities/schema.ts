@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose'
 import { IUser } from '../../../../interfaces'
-import { IVerification } from '../../../../interfaces/IUser'
+import { IVerification } from '../../../../interfaces/IVerificationService'
 import { UserSchemaDef } from '../../../../models/UserSchemaDef'
 import { VerificationSchemaDef } from '../../../../models/VerificationSchemaDef'
 

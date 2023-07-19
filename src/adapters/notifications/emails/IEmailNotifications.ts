@@ -1,5 +1,5 @@
 import { IUser } from '../../../interfaces'
-import { IVerification } from '../../../interfaces/IUser'
+import { IVerification } from '../../../interfaces/IVerificationService'
 
 export interface IEmailNotifications {
   sendActivationMail(user: IUser, verification: IVerification): Promise<any>

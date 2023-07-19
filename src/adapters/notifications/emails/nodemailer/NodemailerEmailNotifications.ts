@@ -1,5 +1,5 @@
 import { IUser } from '../../../../interfaces'
-import { IVerification } from '../../../../interfaces/IUser'
+import { IVerification } from '../../../../interfaces/IVerificationService'
 import { initNodemailer } from '../email-providers/nodemailer'
 import { IEmailNotifications } from '../IEmailNotifications'
 

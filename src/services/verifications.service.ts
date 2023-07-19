@@ -1,6 +1,6 @@
 import { mapMongoDbId } from '../adapters/factories/mongodb/mongodb-util'
 import { VERIFICATION_TYPES } from '../constant'
-import { IVerification } from '../interfaces/IUser'
+import { IVerification } from '../interfaces/IVerificationService'
 import {
   IDalVerificationsService,
   IVerificationsService,

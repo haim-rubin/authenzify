@@ -3,6 +3,7 @@ import { UsersService } from '../../services/users.service'
 import { ConfigService } from '../../services/config.service'
 import { Services } from '../../types'
 import { VerificationsService } from '../../services/verifications.service'
+import { PermissionsService } from '../../services/Permissions.service'
 import {
   initUsersManagement,
   UsersManagement,
@@ -30,7 +31,7 @@ export const factory = async (
     configService,
     iDalVerificationsService,
   )
-
+  //const Permissions = new PermissionsService(configService,)
   const services: Services = {
     Users,
     Verifications,

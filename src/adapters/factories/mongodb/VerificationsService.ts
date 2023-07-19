@@ -1,7 +1,6 @@
-import { IUser, IDalUsersService } from '../../../interfaces'
-import { TUserDetails, TVerificationDetails } from '../../../types'
-import { IUserClean, IVerification } from '../../../interfaces/IUser'
-import { IDalVerificationsService } from '../../../interfaces/IUsersService'
+import { TVerificationDetails } from '../../../types'
+import { IVerification } from '../../../interfaces/IVerificationService'
+import { IDalVerificationsService } from '../../../interfaces/IVerificationService'
 import { TModelsCollections } from '../../databases/mongodb/types'
 import { mapMongoDbId } from './mongodb-util'
 

@@ -1,6 +1,8 @@
 import { HttpStatusClasses, HttpStatusExtra } from 'http-status'
 import { UsersService } from '../services/users.service'
 import { VerificationsService } from '../services/verifications.service'
+import { IPermission } from '../interfaces/IPermissionService'
+import { IPermissionsGroup } from '../interfaces/IPermissionGroupService'
 
 export type TPassword = string
 export type TEmail = string
@@ -49,3 +51,6 @@ export type TVerificationDetails = {
   userId: string
   type: string
 }
+
+export type TPermission = IPermission
+export type TPermissionGroup = IPermissionsGroup

@@ -1,6 +1,7 @@
 import { IUser, IDalUsersService } from '../../../interfaces'
 import { TUserDetails } from '../../../types'
-import { IUserClean, IVerification } from '../../../interfaces/IUser'
+import { IUserClean } from '../../../interfaces/IUser'
+import { IVerification } from '../../../interfaces/IVerificationService'
 import { TModelsCollections } from '../../databases/mongodb/types'
 import { mapMongoDbId } from './mongodb-util'
 
@@ -17,7 +18,6 @@ export class MongoUsersService implements IDalUsersService {
     const session = await this.#modelsCollections.connection.startSession()
 
     try {
-      // await session.withTransaction(async () => {
       const userUpdatedRes = await this.#modelsCollections.User.updateOne(
         { _id: user.id },
         { isValid: true },
