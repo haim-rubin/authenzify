@@ -9,7 +9,7 @@ import { SIGN_UP_SUCCEEDED } from '../../../src/api/responses'
 describe('Sign up', async () => {
   let server
   before(async () => {
-    const config = await getConfig({ port: 9192 })
+    const config = await getConfig({ port: 9199 })
     const storageConfig = config.storage
     await dropDatabase(storageConfig)
     server = (await usersService(config)).server

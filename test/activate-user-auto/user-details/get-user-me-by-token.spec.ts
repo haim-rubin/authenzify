@@ -8,11 +8,12 @@ import { ACTIVATE_USER_BY } from '../../../src/constant'
 describe('Sign up', async () => {
   let server
   let config
-  const { USER_EMAIL, USER_PASSWORD } = process.env
-  const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
   let token
+  let credentials
   before(async () => {
     config = await getConfig({ port: 9393 })
+    const { USER_EMAIL, USER_PASSWORD } = process.env
+    credentials = { email: USER_EMAIL, password: USER_PASSWORD }
     const storageConfig = config.storage
     await dropDatabase(storageConfig)
     server = (await usersService(config)).server

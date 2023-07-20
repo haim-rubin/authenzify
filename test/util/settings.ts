@@ -41,8 +41,12 @@ export const getConfig = async (configOption?: any) => {
     encoding: 'ascii',
   })
   const envParsed = parseEnv(env)
+  Object.entries(envParsed).forEach(([key, value]: [string, any]) => {
+    process.env[key] = process.env[key] || value
+  })
+
   const templatesBasePath = path.join(__dirname, './templates/email')
-  cleanQuotes
+
   const { GMAIL_PASSWORD, GMAIL_USER } = envParsed
 
   const config: IConfig = {
@@ -56,7 +60,7 @@ export const getConfig = async (configOption?: any) => {
     usernamePolicy: '',
     storage: {
       type: 'mongodb',
-      uri: `mongodb://bongo-username:bongo-p2S4W0rD@localhost:27020`,
+      uri: `mongodb://localhost:27017/users-management-test-api-sign-up`,
       options: {
         dbName: 'users-management',
       },

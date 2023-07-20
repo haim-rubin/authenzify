@@ -8,11 +8,12 @@ import { UsersManagement } from '../../../src/adapters/business-logic/users-mana
 describe('Sign up', async () => {
   let server
   let config
-  const { USER_EMAIL, USER_PASSWORD } = process.env
-  const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
   let usersManagement: UsersManagement
+  let credentials
   before(async () => {
     config = await getConfig({ port: 9394 })
+    const { USER_EMAIL, USER_PASSWORD } = process.env
+    credentials = { email: USER_EMAIL, password: USER_PASSWORD }
     const storageConfig = config.storage
     await dropDatabase(storageConfig)
     const userService = await usersService(config)

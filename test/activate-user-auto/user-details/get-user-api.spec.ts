@@ -6,6 +6,7 @@ import { ConfigService } from '../../../src/services/config.service'
 import { factory } from '../../../src/adapters/factories'
 import { IUserClean } from '../../../src/interfaces/IUser'
 import { UsersManagement } from '../../../src/adapters/business-logic/users-management'
+import { dropDatabase } from '../../util/mongodb-util'
 
 describe('User', async () => {
   let server
@@ -14,6 +15,8 @@ describe('User', async () => {
 
   before(async () => {
     const config = await getConfig()
+    const storageConfig = config.storage
+    await dropDatabase(storageConfig)
     const { USER_EMAIL, USER_PASSWORD } = process.env
     const userMinimal = {
       email: USER_EMAIL,
