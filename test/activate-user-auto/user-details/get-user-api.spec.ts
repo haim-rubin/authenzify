@@ -46,7 +46,7 @@ describe('User', async () => {
         .inject({
           cookies: { Authorization: token },
         })
-        .get(`/users/${user.id}`)
+        .get(`/v1/users/${user.id}`)
 
       const retUser = res.json()
 

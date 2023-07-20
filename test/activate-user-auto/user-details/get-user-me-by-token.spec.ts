@@ -17,8 +17,11 @@ describe('Sign up', async () => {
     const storageConfig = config.storage
     await dropDatabase(storageConfig)
     server = (await usersService(config)).server
-    await server.inject().post('/users/sign-up').body(credentials)
-    const res = await server.inject().post('/users/sign-in').body(credentials)
+    await server.inject().post('/v1/users/sign-up').body(credentials)
+    const res = await server
+      .inject()
+      .post('/v1/users/sign-in')
+      .body(credentials)
     const tokenRes = res.json()
     token = tokenRes.token
   })
@@ -27,7 +30,7 @@ describe('Sign up', async () => {
     it('Should test sign up api and return verified user', async () => {
       const user = await server.inject({
         method: 'GET',
-        url: '/users/me',
+        url: '/v1/users/me',
 
         payload: credentials,
 

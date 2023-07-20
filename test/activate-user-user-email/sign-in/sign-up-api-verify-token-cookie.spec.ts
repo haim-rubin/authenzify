@@ -29,7 +29,10 @@ describe('Sign up', async () => {
 
   describe(`Verify user by '${ACTIVATE_USER_BY.USER_EMAIL}'`, () => {
     it('Should test sign up for verify authorization token', async () => {
-      const res = await server.inject().post('/users/sign-in').body(credentials)
+      const res = await server
+        .inject()
+        .post('/v1/users/sign-in')
+        .body(credentials)
 
       const { token } = res.json()
       const cookie = res.cookies.find(({ name }) => {
