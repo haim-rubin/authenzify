@@ -4,7 +4,8 @@ import { IVerification } from '../interfaces/IVerificationService'
 import {
   IDalVerificationsService,
   IVerificationsService,
-} from '../interfaces/IUsersService'
+} from '../interfaces/IVerificationService'
+
 import { TVerificationDetails } from '../types'
 import { ConfigService } from './config.service'
 

@@ -11,52 +11,39 @@ export class MongoPermissionsService implements IDalPermissionsService {
     this.#modelsCollections = modelsCollections
   }
 
-  async findPermission({
-    id,
-    tenantId,
-  }: {
-    id: string
-    tenantId: string
-  }): Promise<IPermission> {
+  async findPermission({ id }: { id: string }): Promise<IPermission> {
     const permission = (
-      await this.#modelsCollections.Permission.findOne({ id, tenantId })
+      await this.#modelsCollections.Permission.findOne({ id })
     )?.toObject()
     return mapMongoDbId(permission)
   }
 
-  async findPermissionsByTenantId(tenantId: string): Promise<[IPermission]> {
+  async findAllPermissions(): Promise<[IPermission]> {
     const permissions = (
-      await this.#modelsCollections.Permission.find({ tenantId })
+      await this.#modelsCollections.Permission.find({})
     )?.toObject()
     return mapMongoDbId(permissions)
   }
 
   async createPermission(permissionDetails: IPermission): Promise<IPermission> {
-    const permission = (
-      await this.#modelsCollections.Permission.create(permissionDetails)
-    )?.toObject()
+    const permission = await this.#modelsCollections.Permission.create(
+      permissionDetails,
+    )
+
     return permission
   }
 
-  async findPermissions({
-    tenantId,
-    filter,
-  }: {
-    tenantId: string
-    filter: any
-  }): Promise<[IPermission]> {
+  async findPermissions({ filter }: { filter: any }): Promise<[IPermission]> {
     const permissions = await this.#modelsCollections.Permission.find({
       ...filter,
-      tenantId,
     })
     return permissions
   }
 
-  async deletePermission({ id, tenantId }: { id: string; tenantId: string }) {
+  async deletePermission({ id }: { id: string }) {
     const permissions = await this.#modelsCollections.Permission.updateOne(
       {
         id,
-        tenantId,
       },
       { isDeleted: true },
     )
@@ -124,5 +111,15 @@ export class MongoPermissionsService implements IDalPermissionsService {
   async getTransaction(): Promise<any> {
     const transaction = await this.#modelsCollections.User.startSession()
     return transaction
+  }
+  async findPermissionsByNames({
+    permissionNames,
+  }: {
+    permissionNames: string[]
+  }) {
+    const existingPermissions = await this.#modelsCollections.Permission.find({
+      name: { $in: permissionNames },
+    })
+    return existingPermissions
   }
 }

@@ -1,13 +1,14 @@
 import { mapMongoDbId } from '../adapters/factories/mongodb/mongodb-util'
 import { VERIFICATION_TYPES } from '../constant'
-import { IPermission } from '../interfaces/IPermissionService'
+import { IPermission, IPermissionBase } from '../interfaces/IPermissionService'
 import { IDalPermissionsService } from '../interfaces/IPermissionService'
-import { TPermission, TPermissionGroup } from '../types'
+import { TPermission, TPermissionsGroup } from '../types'
 import { ConfigService } from './config.service'
 import {
   IDalPermissionsGroupsService,
   IPermissionsGroup,
 } from '../interfaces/IPermissionGroupService'
+import { generatePermissionId } from '../util/record-id-prefixes'
 
 export class PermissionsService {
   #iDalPermissionsService: IDalPermissionsService
@@ -17,59 +18,129 @@ export class PermissionsService {
   constructor(
     config: ConfigService,
     iDalPermissionsService: IDalPermissionsService,
-    iDalPermissionsGroupsService: IDalPermissionsGroupsService,
   ) {
     this.#config = config
     this.#iDalPermissionsService = iDalPermissionsService
-    this.#iDalPermissionsGroupsService = iDalPermissionsGroupsService
   }
 
   async createPermission(permissionDetails: TPermission): Promise<IPermission> {
-    const permission = await this.#iDalPermissionsService.create(
+    const permission = await this.#iDalPermissionsService.createPermission(
+      permissionDetails,
+    )
+
+    return permission
+  }
+
+  async findPermission({ id }: { id: string }): Promise<IPermission> {
+    const permission = await this.#iDalPermissionsService.findPermission({
+      id,
+    })
+
+    return permission
+  }
+
+  async findPermissions({ filter }: { filter: any }): Promise<[IPermission]> {
+    const permissions = await this.#iDalPermissionsService.findPermissions({
+      filter,
+    })
+    return permissions
+  }
+
+  async deletePermission({ id }: { id: any }) {
+    const permission = await this.#iDalPermissionsService.deletePermission({
+      id,
+    })
+    return permission
+  }
+
+  async createPermissionsGroup(
+    permissionDetails: TPermissionsGroup,
+  ): Promise<IPermissionsGroup> {
+    const permission = await this.#iDalPermissionsGroupsService.createGroup(
       permissionDetails,
     )
 
     return mapMongoDbId(permission)
   }
 
-  async createPermissionsGroup(
-    permissionDetails: TPermissionGroup,
-  ): Promise<IPermissionsGroup> {
-    const permission =
-      await this.#iDalPermissionsGroupsService.createPermissionsGroup(
-        permissionDetails,
-      )
-
-    return mapMongoDbId(permission)
-  }
-
-  async findOne(filter): Promise<IPermission> {
-    const permission = await this.#iDalPermissionsService.findOne(filter)
+  async findPermissionsGroups({
+    tenantId,
+    filter,
+  }: {
+    tenantId: string
+    filter: any
+  }): Promise<IPermissionsGroup> {
+    const permission = await this.#iDalPermissionsGroupsService.findGroups({
+      filter,
+      tenantId,
+    })
 
     return permission ? mapMongoDbId(permission) : permission
   }
 
-  async findByUserId({
-    id,
+  async findPermissionsGroup({
     tenantId,
+    id,
   }: {
-    id: string
     tenantId: string
-  }): Promise<IPermission> {
-    const permission = await this.#iDalPermissionsService.findOne({
+    id: any
+  }): Promise<IPermissionsGroup> {
+    const permissionGroups = await this.#iDalPermissionsGroupsService.findGroup(
+      {
+        tenantId,
+        id,
+      },
+    )
+    return mapMongoDbId(permissionGroups)
+  }
+
+  async deletePermissionsGroup({
+    tenantId,
+    id,
+  }: {
+    tenantId: string
+    id: any
+  }) {
+    const permission = await this.#iDalPermissionsGroupsService.deleteGroup({
       id,
       tenantId,
     })
-    return mapMongoDbId(permission)
-  }
-
-  async find(filter: any): Promise<Array<IPermission>> {
-    const permissions = await this.#iDalPermissionsService.find(filter)
-    return permissions.map(mapMongoDbId)
-  }
-
-  async delete(id: string) {
-    const permission = await this.#iDalPermissionsService.delete(id)
     return permission
+  }
+
+  async findPermissionsByNames({
+    permissionNames,
+  }: {
+    permissionNames: string[]
+  }) {
+    const permissionsByNames =
+      await this.#iDalPermissionsService.findPermissionsByNames({
+        permissionNames,
+      })
+    return permissionsByNames.map(({ _doc }) => _doc)
+  }
+
+  async initializePermissions(
+    permissions: IPermissionBase[],
+    //permissionsGroups: [{ name; permissionNames: string[] }],
+  ) {
+    const existingPermissions = await this.findPermissionsByNames({
+      permissionNames: permissions.map(({ name }) => name),
+    })
+    const createPermissionResults = await Promise.all(
+      permissions
+        .filter(({ name }) =>
+          existingPermissions.find((ep) => ep.name !== name),
+        )
+        .map(({ name, description, isDeleted }) => {
+          return this.createPermission({
+            id: generatePermissionId(),
+            name,
+            description,
+            isDeleted,
+          })
+        }),
+    )
+    return createPermissionResults
   }
 }

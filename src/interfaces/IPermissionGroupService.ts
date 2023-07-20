@@ -3,36 +3,29 @@ export interface IPermissionsGroup {
   id: string
   tenantId: string
   name: string
-  permission: [IPermission]
+  permissions: [IPermission]
+  isDeleted: boolean
 }
 
 export interface IDalPermissionsGroupsService {
-  findOne({
+  /* Permissions Groups */
+  findGroup({
     id,
     tenantId,
   }: {
     id: string
     tenantId: string
-  }): Promise<IPermissionsGroup> // Retrieves specific permission groups
-
-  findByUserId({
-    id,
+  }): Promise<IPermissionsGroup> // Retrieves specific permission
+  findGroupsByTenantId(tenantId: string): Promise<[IPermissionsGroup]> // Retrieves all permissions of tenant
+  createGroup(permission: IPermissionsGroup): Promise<IPermissionsGroup>
+  findGroups({
     tenantId,
-  }: {
-    id: string
-    tenantId: string
-  }): Promise<[IPermission]> // Retrieves all permission groups of user
-  createPermissionsGroup(permissionDetails: IPermissionsGroup)
-  findByTenantId(id: string): Promise<[IPermission]> // Retrieves all permission groups of tenant
-  create(permission: IPermission): Promise<IPermission>
-  find({
-    tenant,
     filter,
   }: {
-    tenant: string
+    tenantId: string
     filter: any
-  }): Promise<[IPermission]>
-  delete(id: string)
+  }): Promise<[IPermissionsGroup]>
+  deleteGroup({ id, tenantId }: { id: string; tenantId: string })
 }
 
 export interface IPermissionService {}

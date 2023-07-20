@@ -18,12 +18,18 @@ import {
   Services,
   TPassword,
   TPasswordInfo,
+  TPermission,
+  TPermissionsGroup,
   TSignInEmail,
   TSignUp,
   TVerificationDetails,
 } from '../../types'
 import { doesPasswordMatch, encrypt, getSaltHex } from '../../util/encryption'
 import { addEmailsNotificationsListeners } from '../factories/email-notifications/add-emails-notifications-listeners'
+import {
+  IPermission,
+  IPermissionBase,
+} from '../../interfaces/IPermissionService'
 
 const mapToMinimal = (user: IUserClean): IUserClean => {
   const { username, firstName, lastName, email, id, isDeleted, isValid } = user
@@ -269,6 +275,91 @@ export class UsersManagement
     return true
   }
 
+  //#region Permissions
+  async addPermission(permission: TPermission) {
+    const createResponse = await this.#services.Permissions.createPermission(
+      permission,
+    )
+    return createResponse
+  }
+
+  async addPermissionGroup(permissionGroup: TPermissionsGroup) {
+    const createResponse =
+      await this.#services.Permissions.createPermissionsGroup(permissionGroup)
+    return createResponse
+  }
+
+  async deletePermission({ id }: { id: string }) {
+    const deleteResponse = await this.#services.Permissions.deletePermission({
+      id,
+    })
+    return deleteResponse
+  }
+
+  async deletePermissionsGroup({
+    tenantId,
+    id,
+  }: {
+    tenantId: string
+    id: string
+  }) {
+    const deleteResponse =
+      await this.#services.Permissions.deletePermissionsGroup({ tenantId, id })
+    return deleteResponse
+  }
+
+  async getPermission({ id }: { id: string }): Promise<TPermission> {
+    const permission = await this.#services.Permissions.findPermission({
+      id,
+    })
+
+    return permission
+  }
+
+  async getPermissions({ filter }: { filter: any }): Promise<IPermission[]> {
+    const permissions = await this.#services.Permissions.findPermissions({
+      filter,
+    })
+    return permissions
+  }
+
+  async getPermissionsGroup({
+    tenantId,
+    id,
+  }: {
+    tenantId: string
+    id: string
+  }): Promise<TPermissionsGroup> {
+    const permissionsGroup =
+      await this.#services.Permissions.findPermissionsGroup({
+        tenantId,
+        id,
+      })
+
+    return permissionsGroup
+  }
+
+  async getPermissionsGroups({
+    tenantId,
+    filter,
+  }: {
+    tenantId: string
+    filter: any
+  }): Promise<TPermissionsGroup> {
+    const permissionsGroups =
+      await this.#services.Permissions.findPermissionsGroups({
+        tenantId,
+        filter,
+      })
+    return permissionsGroups
+  }
+
+  async initializePermissions(permissions: [IPermissionBase]) {
+    return this.#services.Permissions.initializePermissions(permissions)
+  }
+  //#endregion
+
+  //#region Events
   onSignUp(onSignUpFunction: Function): void {
     emitter.addListener(
       USERS_SERVICE_EVENTS.USER_SIGN_UP,
@@ -284,8 +375,12 @@ export class UsersManagement
   }
 
   onSignIn(onSignInFunction: Function): void {
-    throw new Error('Method not implemented.')
+    emitter.addListener(
+      USERS_SERVICE_EVENTS.USER_SIGN_IN,
+      onSignInFunction as any,
+    )
   }
+  //#endregion Events
 }
 
 export const initUsersManagement = async ({

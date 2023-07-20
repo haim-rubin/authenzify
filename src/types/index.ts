@@ -3,6 +3,7 @@ import { UsersService } from '../services/users.service'
 import { VerificationsService } from '../services/verifications.service'
 import { IPermission } from '../interfaces/IPermissionService'
 import { IPermissionsGroup } from '../interfaces/IPermissionGroupService'
+import { PermissionsService } from '../services/permissions.service'
 
 export type TPassword = string
 export type TEmail = string
@@ -45,6 +46,7 @@ export type ServicesEvents = {
 export type Services = {
   Users: UsersService
   Verifications: VerificationsService
+  Permissions: PermissionsService
 }
 
 export type TVerificationDetails = {
@@ -53,4 +55,4 @@ export type TVerificationDetails = {
 }
 
 export type TPermission = IPermission
-export type TPermissionGroup = IPermissionsGroup
+export type TPermissionsGroup = IPermissionsGroup

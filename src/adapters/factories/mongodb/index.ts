@@ -1,6 +1,8 @@
 import {
   UserSchema,
   VerificationSchema,
+  PermissionSchema,
+  PermissionsGroupSchema,
 } from '../../databases/mongodb/entities/schema'
 import { initModelsCollections } from '../../databases/mongodb/initialize-models-collections'
 import { connect } from '../../databases/mongodb/connection'
@@ -27,6 +29,14 @@ export const initMongoDb = async ({
       {
         modelInfo: { key: 'Verification', schema: VerificationSchema },
         collectionInfo: { name: 'verification', alias: 'verifications' },
+      },
+      {
+        modelInfo: { key: 'Permission', schema: PermissionSchema },
+        collectionInfo: { name: 'permission', alias: 'permissions' },
+      },
+      {
+        modelInfo: { key: 'PermissionsGroup', schema: PermissionsGroupSchema },
+        collectionInfo: { name: 'permission', alias: 'permissions' },
       },
     ],
   })
