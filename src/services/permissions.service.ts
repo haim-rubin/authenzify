@@ -39,10 +39,10 @@ export class PermissionsService {
     return permission
   }
 
-  async findPermissions({ filter }: { filter: any }): Promise<[IPermission]> {
-    const permissions = await this.#iDalPermissionsService.findPermissions({
+  async findPermissions(filter?: any): Promise<IPermission[]> {
+    const permissions = await this.#iDalPermissionsService.findPermissions(
       filter,
-    })
+    )
     return permissions
   }
 
@@ -124,13 +124,16 @@ export class PermissionsService {
     permissions: IPermissionBase[],
     //permissionsGroups: [{ name; permissionNames: string[] }],
   ) {
-    const existingPermissions = await this.findPermissionsByNames({
-      permissionNames: permissions.map(({ name }) => name),
-    })
+    const existingPermissions: IPermission[] =
+      await this.findPermissionsByNames({
+        permissionNames: permissions.map(({ name }) => name),
+      })
     const createPermissionResults = await Promise.all(
       permissions
-        .filter(({ name }) =>
-          existingPermissions.find((ep) => ep.name !== name),
+        .filter(
+          ({ name }) =>
+            !existingPermissions.length ||
+            !existingPermissions.find((ep) => ep.name === name),
         )
         .map(({ name, description, isDeleted }) => {
           return this.createPermission({
@@ -141,6 +144,8 @@ export class PermissionsService {
           })
         }),
     )
-    return createPermissionResults
+
+    const permissionsUpdated = await this.findPermissions()
+    return permissionsUpdated
   }
 }

@@ -10,7 +10,7 @@ export interface IPermission extends IPermissionBase {
 export interface IDalPermissionsService {
   findPermission({ id }: { id: string }): Promise<IPermission> // Retrieves specific permission
   createPermission(permission: IPermission): Promise<IPermission>
-  findPermissions({ filter }: { filter: any }): Promise<[IPermission]>
+  findPermissions(filter?: any): Promise<IPermission[]>
   deletePermission({ id }: { id: string })
   findPermissionsByNames({ permissionNames }: { permissionNames: string[] })
 }

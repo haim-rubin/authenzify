@@ -60,7 +60,7 @@ export const getConfig = async (configOption?: any) => {
     usernamePolicy: '',
     storage: {
       type: 'mongodb',
-      uri: `mongodb://localhost:27017/users-management-test-api-sign-up`,
+      uri: `mongodb://bongo-username:bongo-p2S4W0rD@localhost:27020`,
       options: {
         dbName: 'users-management',
       },

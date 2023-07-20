@@ -316,10 +316,8 @@ export class UsersManagement
     return permission
   }
 
-  async getPermissions({ filter }: { filter: any }): Promise<IPermission[]> {
-    const permissions = await this.#services.Permissions.findPermissions({
-      filter,
-    })
+  async getPermissions(filter: any): Promise<IPermission[]> {
+    const permissions = await this.#services.Permissions.findPermissions(filter)
     return permissions
   }
 
@@ -354,7 +352,7 @@ export class UsersManagement
     return permissionsGroups
   }
 
-  async initializePermissions(permissions: [IPermissionBase]) {
+  async initializePermissions(permissions: IPermissionBase[]) {
     return this.#services.Permissions.initializePermissions(permissions)
   }
   //#endregion

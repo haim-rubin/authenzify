@@ -16,7 +16,7 @@ export interface IDalPermissionsGroupsService {
     id: string
     tenantId: string
   }): Promise<IPermissionsGroup> // Retrieves specific permission
-  findGroupsByTenantId(tenantId: string): Promise<[IPermissionsGroup]> // Retrieves all permissions of tenant
+  findGroupsByTenantId(tenantId: string): Promise<IPermissionsGroup[]> // Retrieves all permissions of tenant
   createGroup(permission: IPermissionsGroup): Promise<IPermissionsGroup>
   findGroups({
     tenantId,
@@ -24,7 +24,7 @@ export interface IDalPermissionsGroupsService {
   }: {
     tenantId: string
     filter: any
-  }): Promise<[IPermissionsGroup]>
+  }): Promise<IPermissionsGroup[]>
   deleteGroup({ id, tenantId }: { id: string; tenantId: string })
 }
 

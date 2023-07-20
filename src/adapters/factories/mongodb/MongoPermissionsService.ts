@@ -18,7 +18,7 @@ export class MongoPermissionsService implements IDalPermissionsService {
     return mapMongoDbId(permission)
   }
 
-  async findAllPermissions(): Promise<[IPermission]> {
+  async findAllPermissions(): Promise<IPermission[]> {
     const permissions = (
       await this.#modelsCollections.Permission.find({})
     )?.toObject()
@@ -33,10 +33,8 @@ export class MongoPermissionsService implements IDalPermissionsService {
     return permission
   }
 
-  async findPermissions({ filter }: { filter: any }): Promise<[IPermission]> {
-    const permissions = await this.#modelsCollections.Permission.find({
-      ...filter,
-    })
+  async findPermissions(filter: any): Promise<IPermission[]> {
+    const permissions = await this.#modelsCollections.Permission.find(filter)
     return permissions
   }
 
@@ -65,7 +63,7 @@ export class MongoPermissionsService implements IDalPermissionsService {
     return mapMongoDbId(group)
   }
 
-  async findGroupsByTenantId(tenantId: string): Promise<[IPermissionsGroup]> {
+  async findGroupsByTenantId(tenantId: string): Promise<IPermissionsGroup[]> {
     const group = (
       await this.#modelsCollections.PermissionsGroup.find({ tenantId })
     )?.toObject()
@@ -88,7 +86,7 @@ export class MongoPermissionsService implements IDalPermissionsService {
   }: {
     tenantId: string
     filter: any
-  }): Promise<[IPermissionsGroup]> {
+  }): Promise<IPermissionsGroup[]> {
     const permissionsGroups =
       await this.#modelsCollections.PermissionsGroup.find({
         ...filter,

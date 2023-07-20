@@ -21,22 +21,33 @@ describe('Permissions', () => {
     const { USER_EMAIL, USER_PASSWORD } = process.env
     credentials = { email: USER_EMAIL, password: USER_PASSWORD }
     const storageConfig = config.storage
-    //  await dropDatabase(storageConfig)
+    await dropDatabase(storageConfig)
   })
 
   describe(`Initialize Permissions`, () => {
     it('Should create application permissions', async () => {
       const configService = new ConfigService(config)
       const usersManagements = (await factory(configService)) as UsersManagement
-      const permissionsResponse = await usersManagements.initializePermissions([
+      const permissionsToCreate = [
         {
-          name: 'change-password',
+          name: 'change-password-editor',
           isDeleted: false,
           description: 'Allow the user to change is password',
         },
-      ])
-      console.log(permissionsResponse)
-      //    assert.equal(encoded.email, credentials.email)
+        {
+          name: 'change-password-viewer',
+          isDeleted: false,
+          description: 'Allow the user to view change is password',
+        },
+      ]
+      const permissionsResponse = await usersManagements.initializePermissions(
+        permissionsToCreate,
+      )
+
+      const allExists = permissionsResponse.every((createdPermission) =>
+        permissionsToCreate.find(({ name }) => createdPermission.name === name),
+      )
+      assert.equal(allExists, true)
     })
   })
 })
