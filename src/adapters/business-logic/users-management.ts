@@ -316,6 +316,14 @@ export class UsersManagement
     return permission
   }
 
+  async getPermissionByName({ name }: { name: string }): Promise<TPermission> {
+    const permission = await this.#services.Permissions.findPermissionByName({
+      name,
+    })
+
+    return permission
+  }
+
   async getPermissions(filter: any): Promise<IPermission[]> {
     const permissions = await this.#services.Permissions.findPermissions(filter)
     return permissions

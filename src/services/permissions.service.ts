@@ -119,11 +119,14 @@ export class PermissionsService {
       })
     return permissionsByNames.map(({ _doc }) => _doc)
   }
+  async findPermissionByName({ name }: { name: string }) {
+    const permission = await this.#iDalPermissionsService.findPermissionByName({
+      name,
+    })
 
-  async initializePermissions(
-    permissions: IPermissionBase[],
-    //permissionsGroups: [{ name; permissionNames: string[] }],
-  ) {
+    return permission
+  }
+  async initializePermissions(permissions: IPermissionBase[]) {
     const existingPermissions: IPermission[] =
       await this.findPermissionsByNames({
         permissionNames: permissions.map(({ name }) => name),

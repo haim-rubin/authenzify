@@ -12,17 +12,22 @@ export class MongoPermissionsService implements IDalPermissionsService {
   }
 
   async findPermission({ id }: { id: string }): Promise<IPermission> {
-    const permission = (
-      await this.#modelsCollections.Permission.findOne({ id })
-    )?.toObject()
-    return mapMongoDbId(permission)
+    const permission = await this.#modelsCollections.Permission.findOne({ id })
+
+    return permission
+  }
+
+  async findPermissionByName({ name }: { name: string }): Promise<IPermission> {
+    const permission = await this.#modelsCollections.Permission.findOne({
+      name,
+    })
+
+    return permission
   }
 
   async findAllPermissions(): Promise<IPermission[]> {
-    const permissions = (
-      await this.#modelsCollections.Permission.find({})
-    )?.toObject()
-    return mapMongoDbId(permissions)
+    const permissions = await this.#modelsCollections.Permission.find({})
+    return permissions
   }
 
   async createPermission(permissionDetails: IPermission): Promise<IPermission> {
@@ -60,24 +65,25 @@ export class MongoPermissionsService implements IDalPermissionsService {
       id,
     })
 
-    return mapMongoDbId(group)
+    return group
   }
 
   async findGroupsByTenantId(tenantId: string): Promise<IPermissionsGroup[]> {
-    const group = (
-      await this.#modelsCollections.PermissionsGroup.find({ tenantId })
-    )?.toObject()
+    const group = await this.#modelsCollections.PermissionsGroup.find({
+      tenantId,
+    })
+
     return mapMongoDbId(group)
   }
 
   async createGroup(
     permissionsGroupDetails: IPermissionsGroup,
   ): Promise<IPermissionsGroup> {
-    const permissionsGroup = (
+    const permissionsGroup =
       await this.#modelsCollections.PermissionsGroup.create(
         permissionsGroupDetails,
       )
-    )?.toObject()
+
     return permissionsGroup
   }
   async findGroups({

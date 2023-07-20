@@ -28,20 +28,15 @@ describe('Permissions', () => {
           isDeleted: false,
           description: 'Allow the user to change is password',
         },
-        {
-          name: 'change-password-viewer',
-          isDeleted: false,
-          description: 'Allow the user to view change is password',
-        },
       ]
-      const permissionsResponse = await usersManagements.initializePermissions(
+      const permissions = await usersManagements.initializePermissions(
         permissionsToCreate,
       )
+      const permission = await usersManagements.getPermissionByName({
+        name: permissionsToCreate[0].name,
+      })
 
-      const allExists = permissionsResponse.every((createdPermission) =>
-        permissionsToCreate.find(({ name }) => createdPermission.name === name),
-      )
-      assert.equal(allExists, true)
+      assert.equal(permission.id, permissions[0].id)
     })
   })
 })
