@@ -47,4 +47,5 @@ export interface IConfig {
     settings: IEmailSettings
     emailTemplates: IEmailTemplates
   }
+  usersRoutesPrefix?: string
 }

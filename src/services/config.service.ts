@@ -109,4 +109,15 @@ export class ConfigService {
   get activationVerificationRoute() {
     return this.#config.activationVerificationRoute
   }
+
+  get usersRoutesPrefix() {
+    return this.#config.usersRoutesPrefix || '/v1/users'
+  }
+
+  get host() {
+    return this.#config.host || '0.0.0.0'
+  }
+  get port() {
+    return this.#config.port || 9090
+  }
 }
