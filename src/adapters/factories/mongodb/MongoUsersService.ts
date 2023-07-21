@@ -1,5 +1,5 @@
 import { IUser, IDalUsersService } from '../../../interfaces'
-import { TUserDetails } from '../../../types'
+import { IUserDetails } from '../../../types'
 import { IUserClean } from '../../../interfaces/IUser'
 import { IVerification } from '../../../interfaces/IVerificationService'
 import { TModelsCollections } from '../../databases/mongodb/types'
@@ -65,8 +65,17 @@ export class MongoUsersService implements IDalUsersService {
   }
 
   map(user: any): IUserClean {
-    const { id, email, firstName, lastName, username, isValid, isDeleted } =
-      mapMongoDbId(user)
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+      username,
+      isValid,
+      isDeleted,
+      permissions,
+      permissionsGroups,
+    } = mapMongoDbId(user)
 
     return {
       email,
@@ -76,10 +85,12 @@ export class MongoUsersService implements IDalUsersService {
       username,
       isValid,
       isDeleted,
+      permissions,
+      permissionsGroups,
     }
   }
 
-  async create(userDetails: TUserDetails): Promise<IUserClean> {
+  async create(userDetails: IUserDetails): Promise<IUserClean> {
     const user = await this.#modelsCollections.User.create(userDetails)
     return this.map(user.toObject())
   }

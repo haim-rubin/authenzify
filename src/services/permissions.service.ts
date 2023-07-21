@@ -1,5 +1,4 @@
 import { mapMongoDbId } from '../adapters/factories/mongodb/mongodb-util'
-import { VERIFICATION_TYPES } from '../constant'
 import { IPermission, IPermissionBase } from '../interfaces/IPermissionService'
 import { IDalPermissionsService } from '../interfaces/IPermissionService'
 import { TPermission, TPermissionsGroup } from '../types'

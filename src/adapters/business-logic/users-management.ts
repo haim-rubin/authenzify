@@ -122,6 +122,7 @@ export class UsersManagement
         ...userDetails,
         ...encryptedPassword,
         isValid: this.#configService.activateUserAuto,
+        permissions: this.#configService.defaultPermissionsSignUp,
       })
 
       const userClean: IUserClean = mapToMinimal(user)
@@ -198,8 +199,16 @@ export class UsersManagement
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
     }
 
-    const { id, email, firstName, lastName, username, isValid, isDeleted } =
-      user
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+      username,
+      isValid,
+      isDeleted,
+      permissions,
+    } = user
 
     if (isDeleted) {
       throw new HttpError(SIGN_IN_ERRORS.USER_DELETED)
@@ -227,6 +236,7 @@ export class UsersManagement
         firstName,
         lastName,
         username,
+        permissions,
       },
       this.#configService.privateKey,
       this.#configService.jwtSignOptions,

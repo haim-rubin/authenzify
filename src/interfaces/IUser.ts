@@ -1,5 +1,4 @@
 import { IPermissionsGroup } from './IPermissionGroupService'
-import { IPermission } from './IPermissionService'
 
 export interface IUserBase {
   id: string
@@ -7,7 +6,7 @@ export interface IUserBase {
   firstName: string
   lastName: string
   username: string
-  permissions?: IPermission[]
+  permissions?: string[]
   permissionsGroups?: IPermissionsGroup[]
 }
 export interface IUserClean extends IUserBase {

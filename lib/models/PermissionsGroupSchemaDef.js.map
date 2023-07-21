@@ -1,0 +1,1 @@
+{"version":3,"file":"PermissionsGroupSchemaDef.js","sourceRoot":"","sources":["../../src/models/PermissionsGroupSchemaDef.ts"],"names":[],"mappings":";;;AAAa,QAAA,yBAAyB,GAAG;IACvC,EAAE,EAAE,MAAM;IACV,QAAQ,EAAE,EAAE,IAAI,EAAE,MAAM,EAAE,QAAQ,EAAE,IAAI,EAAE;IAC1C,IAAI,EAAE,EAAE,IAAI,EAAE,MAAM,EAAE,QAAQ,EAAE,IAAI,EAAE;IACtC,SAAS,EAAE,OAAO;IAClB,WAAW,EAAE,KAAK;CACnB,CAAA"}

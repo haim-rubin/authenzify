@@ -50,6 +50,12 @@ export const getConfig = async (configOption?: any) => {
   const { GMAIL_PASSWORD, GMAIL_USER } = envParsed
 
   const config: IConfig = {
+    onSignUpFirstBasePermissions: [
+      'sign-up-editor',
+      'sign-in-editor',
+      'change-password-editor',
+      'change-password-viewer',
+    ],
     clientDomain: 'http://localhost:9090',
     applicationName: 'Authenzify',
     activationVerificationRoute:

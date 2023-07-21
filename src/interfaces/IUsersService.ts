@@ -1,7 +1,7 @@
 import {
   TEmail,
   TPassword,
-  TUserDetails,
+  IUserDetails,
   TPasswordInfo,
   TSignUp,
   TSignInEmail,
@@ -12,7 +12,7 @@ import { IVerification } from './IVerificationService'
 export interface IDalUsersService {
   findOne({ email }: { email: TEmail }): Promise<IUser>
   findById(id: string): Promise<IUser>
-  create(user: TUserDetails): Promise<IUserClean>
+  create(user: IUserDetails): Promise<IUserClean>
   find(filter: any): Promise<[IUser]>
   verifyUser(user: IUserClean, verification: IVerification): Promise<any>
 }

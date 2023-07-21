@@ -1,7 +1,7 @@
 import { IUser, IUserClean } from '../interfaces/IUser'
 import { IVerification } from '../interfaces/IVerificationService'
 import { IUsersService, IDalUsersService } from '../interfaces'
-import { TUserDetails, TEmail } from '../types'
+import { IUserDetails, TEmail } from '../types'
 import { ConfigService } from './config.service'
 
 export class UsersService implements IUsersService {
@@ -20,7 +20,7 @@ export class UsersService implements IUsersService {
     return this.#iDalUsersService.verifyUser(user, verification)
   }
 
-  async create(userDetails: TUserDetails) {
+  async create(userDetails: IUserDetails) {
     return this.#iDalUsersService.create(userDetails)
   }
 

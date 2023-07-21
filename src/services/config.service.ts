@@ -120,4 +120,8 @@ export class ConfigService {
   get port() {
     return this.#config.port || 9090
   }
+
+  get defaultPermissionsSignUp() {
+    return this.#config.onSignUpFirstBasePermissions || []
+  }
 }

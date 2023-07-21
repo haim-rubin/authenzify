@@ -31,8 +31,9 @@ export type TPasswordInfo = {
   salt: String
 }
 
-export interface TUserDetails extends TSignUp, TPasswordInfo {
+export interface IUserDetails extends TSignUp, TPasswordInfo {
   isValid: Boolean
+  permissions?: string[]
 }
 
 export type ServicesEvents = {

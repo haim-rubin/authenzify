@@ -48,4 +48,5 @@ export interface IConfig {
     emailTemplates: IEmailTemplates
   }
   usersRoutesPrefix?: string
+  onSignUpFirstBasePermissions: string[]
 }

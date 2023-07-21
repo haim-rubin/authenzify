@@ -12,7 +12,9 @@ export class MongoPermissionsService implements IDalPermissionsService {
   }
 
   async findPermission({ id }: { id: string }): Promise<IPermission> {
-    const permission = await this.#modelsCollections.Permission.findOne({ id })
+    const permission = await this.#modelsCollections.Permission.findOne({
+      id,
+    })?.select()
 
     return permission
   }
@@ -40,7 +42,7 @@ export class MongoPermissionsService implements IDalPermissionsService {
 
   async findPermissions(filter: any): Promise<IPermission[]> {
     const permissions = await this.#modelsCollections.Permission.find(filter)
-    return permissions
+    return permissions ? permissions.map(({ _doc }) => _doc) : permissions
   }
 
   async deletePermission({ id }: { id: string }) {

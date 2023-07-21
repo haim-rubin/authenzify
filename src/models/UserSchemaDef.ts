@@ -8,4 +8,5 @@ export const UserSchemaDef = {
   isDeleted: { type: Boolean, default: false },
   password: String,
   salt: String,
+  permissions: Array<String>,
 }
