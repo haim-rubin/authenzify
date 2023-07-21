@@ -137,12 +137,13 @@ export class PermissionsService {
             !existingPermissions.length ||
             !existingPermissions.find((ep) => ep.name === name),
         )
-        .map(({ name, description, isDeleted }) => {
+        .map(({ name, description, isDeleted, isBase }) => {
           return this.createPermission({
             id: generatePermissionId(),
             name,
             description,
             isDeleted,
+            isBase,
           })
         }),
     )

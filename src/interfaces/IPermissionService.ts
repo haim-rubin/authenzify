@@ -2,6 +2,7 @@ export interface IPermissionBase {
   name: string
   description: string
   isDeleted: boolean
+  isBase: boolean
 }
 export interface IPermission extends IPermissionBase {
   id: string

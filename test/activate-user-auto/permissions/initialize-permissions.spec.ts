@@ -27,11 +27,13 @@ describe('Permissions', () => {
           name: 'change-password-editor',
           isDeleted: false,
           description: 'Allow the user to change is password',
+          isBase: true,
         },
         {
           name: 'change-password-viewer',
           isDeleted: false,
           description: 'Allow the user to view change is password',
+          isBase: true,
         },
       ]
       const permissionsResponse = await usersManagements.initializePermissions(
