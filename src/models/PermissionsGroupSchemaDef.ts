@@ -3,5 +3,5 @@ export const PermissionsGroupSchemaDef = {
   tenantId: { type: String, required: true },
   name: { type: String, required: true },
   isDeleted: Boolean,
-  permissions: Array,
+  permissions: Array<String>,
 }

@@ -6,6 +6,7 @@ export interface IUserBase {
   firstName: string
   lastName: string
   username: string
+  tenantId?: string
   permissions?: string[]
   permissionsGroups?: IPermissionsGroup[]
 }

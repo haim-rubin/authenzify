@@ -3,6 +3,9 @@ import { TSignUp } from '../types'
 import { withErrorHandlingReply } from '../errors/with-error-reply-handling'
 import { SIGN_UP_SUCCEEDED } from '../api/responses'
 import { cleanUser } from '../util/helpers'
+import { UsersManagement } from '../adapters/business-logic/users-management'
+import { ConfigService } from '../services/config.service'
+import HttpError from '../errors/HttpError'
 interface IParams extends RequestGenericInterface {
   id: string
 }
@@ -10,6 +13,10 @@ export const initUsersRoutes = ({
   usersManagement,
   configService,
   authenticated,
+}: {
+  usersManagement: UsersManagement
+  configService: ConfigService
+  authenticated: Function
 }) => {
   return async (webServer) => {
     await webServer.post('/sign-up', function (request, reply) {
@@ -21,7 +28,9 @@ export const initUsersRoutes = ({
         const userDetails = body as TSignUp
         this.log.info(`Sign up user email: '${userDetails.email}'`)
         const user = await usersManagement.signUp(userDetails as TSignUp)
-
+        this.log.info(
+          `Succeeded to create user: { email: ${user.email}, id: ${user.id} }`,
+        )
         reply
           .status(SIGN_UP_SUCCEEDED.httpStatusCode)
           .send({ ...SIGN_UP_SUCCEEDED.httpResponse })
@@ -103,5 +112,31 @@ export const initUsersRoutes = ({
         reply.send(verified)
       })
     })
+
+    await webServer.post(
+      '/permissions/:id',
+      { preHandler: [authenticated] },
+      function (request, reply) {
+        withErrorHandlingReply({
+          reply,
+          log: this.log,
+        })(async () => {
+          const { id } = request.params
+
+          const userInfo = request.requestContext.get('userInfo')
+
+          const { body: companyDetails } = request
+
+          const requestPermissionForUserResponse =
+            await usersManagement.requestPermissionForUser({
+              companyDetails,
+              userInfo,
+              id,
+            })
+
+          reply.send(requestPermissionForUserResponse)
+        })
+      },
+    )
   }
 }

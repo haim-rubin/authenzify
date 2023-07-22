@@ -1,6 +1,7 @@
 export const VERIFICATION_TYPES = Object.freeze({
   SIGN_UP: 'SIGN_UP',
   FORGOT_PASSWORD: 'FORGOT_PASSWORD',
+  PERMISSIONS: 'PERMISSIONS',
 })
 
 export const EmailProvider = {

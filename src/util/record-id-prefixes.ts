@@ -4,6 +4,7 @@ export const DATABASE_ID_PREFIX = Object.freeze({
   VERIFICATION: 'vrf',
   PERMISSION: 'prm',
   PERMISSIONS_GROUP: 'role',
+  TENANT: 'tnt',
 })
 
 const generateId = () => {
@@ -24,4 +25,8 @@ export const generatePermissionId = () => {
 
 export const generatePermissionsGroupId = () => {
   return `${DATABASE_ID_PREFIX.PERMISSIONS_GROUP}_${generateId()}`
+}
+
+export const generateTenantId = () => {
+  return `${DATABASE_ID_PREFIX.TENANT}_${generateId()}`
 }

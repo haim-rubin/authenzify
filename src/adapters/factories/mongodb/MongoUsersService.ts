@@ -11,6 +11,14 @@ export class MongoUsersService implements IDalUsersService {
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
+  async updateUser({ id }, userDetails) {
+    const userUpdatedRes = await this.#modelsCollections.User.updateOne(
+      { _id: id },
+      userDetails,
+    )
+
+    return userUpdatedRes
+  }
   async verifyUser(
     user: IUserClean,
     verification: IVerification,

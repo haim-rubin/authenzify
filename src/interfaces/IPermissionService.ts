@@ -1,3 +1,5 @@
+import { IPermissionsGroup } from './IPermissionGroupService'
+
 export interface IPermissionBase {
   name: string
   description: string

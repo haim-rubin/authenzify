@@ -1,6 +1,11 @@
 import { sign, verify } from 'jsonwebtoken'
+
 import { VERIFICATION_TYPES } from '../../constant'
-import { SIGN_IN_ERRORS, SIGN_UP_ERRORS } from '../../errors/error-codes'
+import {
+  PERMISSIONS_ERRORS,
+  SIGN_IN_ERRORS,
+  SIGN_UP_ERRORS,
+} from '../../errors/error-codes'
 import HttpError from '../../errors/HttpError'
 import { USERS_SERVICE_EVENTS } from '../../events/users-service.events'
 import { IUserClean } from '../../interfaces/IUser'
@@ -30,6 +35,10 @@ import {
   IPermission,
   IPermissionBase,
 } from '../../interfaces/IPermissionService'
+import {
+  generatePermissionsGroupId,
+  generateTenantId,
+} from '../../util/record-id-prefixes'
 
 const mapToMinimal = (user: IUserClean): IUserClean => {
   const {
@@ -179,6 +188,9 @@ export class UsersManagement
       username,
       isValid,
       isDeleted,
+      tenantId,
+      permissions,
+      permissionsGroups,
     } = user
 
     return {
@@ -189,6 +201,9 @@ export class UsersManagement
       username,
       isValid,
       isDeleted,
+      tenantId,
+      permissions,
+      permissionsGroups,
     }
   }
 
@@ -306,7 +321,7 @@ export class UsersManagement
     return createResponse
   }
 
-  async addPermissionGroup(permissionGroup: TPermissionsGroup) {
+  async addPermissionsGroup(permissionGroup: TPermissionsGroup) {
     const createResponse =
       await this.#services.Permissions.createPermissionsGroup(permissionGroup)
     return createResponse
@@ -373,8 +388,8 @@ export class UsersManagement
     filter,
   }: {
     tenantId: string
-    filter: any
-  }): Promise<TPermissionsGroup> {
+    filter?: any
+  }): Promise<TPermissionsGroup[]> {
     const permissionsGroups =
       await this.#services.Permissions.findPermissionsGroups({
         tenantId,
@@ -385,6 +400,71 @@ export class UsersManagement
 
   async initializePermissions(permissions: IPermissionBase[]) {
     return this.#services.Permissions.initializePermissions(permissions)
+  }
+
+  async createPermissionsGroupsForNewCompany({
+    tenantId,
+  }: {
+    tenantId: string
+  }) {
+    const existing = await this.getPermissionsGroups({ tenantId })
+    const existingNames = existing.map(({ name }) => name)
+    const createPermissionsGroupsResponse = await Promise.all(
+      Object.entries(this.#configService.permissionsGroups)
+        .filter(([name]) => !existingNames.includes(name))
+        .map(([name, permissions]: [string, string[]]) => {
+          return this.addPermissionsGroup({
+            id: generatePermissionsGroupId(),
+            tenantId,
+            name,
+            isDeleted: false,
+            permissions,
+          })
+        }),
+    )
+    return createPermissionsGroupsResponse
+  }
+
+  async requestPermissionForUser({ id, companyDetails, userInfo }) {
+    if (userInfo.id !== id) {
+      throw new HttpError(
+        PERMISSIONS_ERRORS.PERMISSION_CANNOT_INITIATE_BY_OTHER_USER,
+      )
+    }
+    const user = await this.getUser({ id })
+    if (userInfo.email !== user.email) {
+      throw new HttpError(PERMISSIONS_ERRORS.INVALID_INITIATOR_EMAIL)
+    }
+
+    if (userInfo.email === companyDetails.email && !user.tenantId) {
+      // Case is the first user
+      const tenantId = generateTenantId()
+      const updatedUserResponse = await this.#services.Users.updateUser(
+        { id },
+        { tenantId },
+      )
+
+      const permissionsGroups = await this.createPermissionsGroupsForNewCompany(
+        { tenantId },
+      )
+    }
+
+    const userWithTenantId = await this.getUser({ id })
+    const permissionsGroups = await this.getPermissionsGroups({
+      tenantId: userWithTenantId.tenantId,
+      filter: {},
+    })
+
+    const verification = await this.createVerification({
+      userId: id,
+      type: VERIFICATION_TYPES.PERMISSIONS,
+    })
+    emitter.emit(USERS_SERVICE_EVENTS.USER_PERMISSIONS_REQUESTED, {
+      permissionsGroups,
+      verification,
+      user,
+      adminEmail: companyDetails.email,
+    })
   }
   //#endregion
 
@@ -407,6 +487,13 @@ export class UsersManagement
     emitter.addListener(
       USERS_SERVICE_EVENTS.USER_SIGN_IN,
       onSignInFunction as any,
+    )
+  }
+
+  onPermissionsRequested(onPermissionsRequestedFunction: Function): void {
+    emitter.addListener(
+      USERS_SERVICE_EVENTS.USER_PERMISSIONS_REQUESTED,
+      onPermissionsRequestedFunction as any,
     )
   }
   //#endregion Events

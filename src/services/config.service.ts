@@ -124,4 +124,8 @@ export class ConfigService {
   get defaultPermissionsSignUp() {
     return this.#config.onSignUpFirstBasePermissions || []
   }
+
+  get permissionsGroups() {
+    return this.#config.permissionsGroups
+  }
 }

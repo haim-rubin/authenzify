@@ -12,6 +12,8 @@ import { MongoUsersService } from './MongoUsersService'
 import { MongoVerificationsService } from './VerificationsService'
 import { IDalVerificationsService } from '../../../interfaces/IVerificationService'
 import { MongoPermissionsService } from './MongoPermissionsService'
+import { MongoPermissionsGroupsService } from './MongoPermissionsGroupsService'
+import { IDalPermissionsGroupsService } from '../../../interfaces/IPermissionGroupService'
 
 export const initMongoDb = async ({
   config,
@@ -52,6 +54,7 @@ export const initMongoDalServices = async ({
   iDalUsersService: IDalUsersService
   iDalVerificationsService: IDalVerificationsService
   iDalPermissionsService: IDalPermissionsService
+  iDalPermissionsGroupsService: IDalPermissionsGroupsService
 }> => {
   const modelsCollections = await initMongoDb({ config })
   const iDalUsersService = new MongoUsersService(modelsCollections)
@@ -59,5 +62,13 @@ export const initMongoDalServices = async ({
     modelsCollections,
   )
   const iDalPermissionsService = new MongoPermissionsService(modelsCollections)
-  return { iDalUsersService, iDalVerificationsService, iDalPermissionsService }
+  const iDalPermissionsGroupsService = new MongoPermissionsGroupsService(
+    modelsCollections,
+  )
+  return {
+    iDalUsersService,
+    iDalVerificationsService,
+    iDalPermissionsService,
+    iDalPermissionsGroupsService,
+  }
 }

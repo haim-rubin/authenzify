@@ -79,3 +79,16 @@ export const SIGN_IN_ERRORS = {
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
   },
 }
+
+export const PERMISSIONS_ERRORS = {
+  PERMISSION_CANNOT_INITIATE_BY_OTHER_USER: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.PERMISSION_CANNOT_INITIATE_BY_OTHER_USER',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  INVALID_INITIATOR_EMAIL: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.INVALID_INITIATOR_EMAIL',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+}

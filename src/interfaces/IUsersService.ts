@@ -15,6 +15,7 @@ export interface IDalUsersService {
   create(user: IUserDetails): Promise<IUserClean>
   find(filter: any): Promise<[IUser]>
   verifyUser(user: IUserClean, verification: IVerification): Promise<any>
+  updateUser({ id }: { id: string }, userDetails: any)
 }
 
 export interface IUserServiceEncryption {

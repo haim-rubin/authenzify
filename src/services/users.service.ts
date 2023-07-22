@@ -27,4 +27,8 @@ export class UsersService implements IUsersService {
   async findOne({ email }: { email: TEmail }): Promise<IUser> {
     return this.#iDalUsersService.findOne({ email })
   }
+
+  async updateUser({ id }: { id }, userDetails: any) {
+    return this.#iDalUsersService.updateUser({ id }, userDetails)
+  }
 }

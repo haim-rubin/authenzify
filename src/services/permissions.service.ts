@@ -17,9 +17,11 @@ export class PermissionsService {
   constructor(
     config: ConfigService,
     iDalPermissionsService: IDalPermissionsService,
+    iDalPermissionsGroupsService: IDalPermissionsGroupsService,
   ) {
     this.#config = config
     this.#iDalPermissionsService = iDalPermissionsService
+    this.#iDalPermissionsGroupsService = iDalPermissionsGroupsService
   }
 
   async createPermission(permissionDetails: TPermission): Promise<IPermission> {
@@ -67,14 +69,15 @@ export class PermissionsService {
     filter,
   }: {
     tenantId: string
-    filter: any
-  }): Promise<IPermissionsGroup> {
-    const permission = await this.#iDalPermissionsGroupsService.findGroups({
-      filter,
-      tenantId,
-    })
+    filter?: any
+  }): Promise<IPermissionsGroup[]> {
+    const permissionsGroups =
+      await this.#iDalPermissionsGroupsService.findGroups({
+        filter,
+        tenantId,
+      })
 
-    return permission ? mapMongoDbId(permission) : permission
+    return permissionsGroups
   }
 
   async findPermissionsGroup({

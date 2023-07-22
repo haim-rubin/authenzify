@@ -55,5 +55,10 @@ export const addEmailsNotificationsListeners = async ({
 
       await emailNotifications.sendActivationMail(user, verification)
     })
+    usersManagement.onPermissionsRequested(
+      async ({ permissionsGroups, verification, user, adminEmail }) => {
+        debugger
+      },
+    )
   }
 }

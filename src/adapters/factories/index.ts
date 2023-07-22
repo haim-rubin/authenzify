@@ -20,10 +20,14 @@ export const factory = async (
     throw new Error(`${configService.storage.type} storage not supported yet`)
   }
 
-  const { iDalUsersService, iDalVerificationsService, iDalPermissionsService } =
-    await initMongoDalServices({
-      config: configService.storage,
-    })
+  const {
+    iDalUsersService,
+    iDalVerificationsService,
+    iDalPermissionsService,
+    iDalPermissionsGroupsService,
+  } = await initMongoDalServices({
+    config: configService.storage,
+  })
 
   const Users = new UsersService(configService, iDalUsersService)
 
@@ -35,6 +39,7 @@ export const factory = async (
   const Permissions = new PermissionsService(
     configService,
     iDalPermissionsService,
+    iDalPermissionsGroupsService,
   )
   //const Permissions = new PermissionsService(configService,)
   const services: Services = {
