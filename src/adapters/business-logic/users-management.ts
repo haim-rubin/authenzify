@@ -32,7 +32,17 @@ import {
 } from '../../interfaces/IPermissionService'
 
 const mapToMinimal = (user: IUserClean): IUserClean => {
-  const { username, firstName, lastName, email, id, isDeleted, isValid } = user
+  const {
+    username,
+    firstName,
+    lastName,
+    email,
+    id,
+    isDeleted,
+    isValid,
+    permissions,
+    permissionsGroups,
+  } = user
   const userMinimal: IUserClean = {
     username,
     firstName,
@@ -41,6 +51,8 @@ const mapToMinimal = (user: IUserClean): IUserClean => {
     id,
     isDeleted,
     isValid,
+    permissions,
+    permissionsGroups,
   }
   return userMinimal
 }
@@ -117,12 +129,13 @@ export class UsersManagement
       }
 
       const encryptedPassword = await this.encrypt({ password })
-
+      const defaultPermissionsSignUp =
+        await this.#services.Permissions.findPermissions({ isBase: true })
       const user = await this.#services.Users.create({
         ...userDetails,
         ...encryptedPassword,
         isValid: this.#configService.activateUserAuto,
-        permissions: this.#configService.defaultPermissionsSignUp,
+        permissions: defaultPermissionsSignUp.map(({ name }) => name),
       })
 
       const userClean: IUserClean = mapToMinimal(user)

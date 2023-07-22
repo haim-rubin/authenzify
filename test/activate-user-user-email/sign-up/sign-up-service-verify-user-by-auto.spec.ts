@@ -38,7 +38,7 @@ describe('Sign up', async () => {
         password: USER_PASSWORD,
       })
 
-      const { id, ...userClean } = user
+      const { id, permissions, permissionsGroups, ...userClean } = user
       assert.deepEqual(userClean, {
         email: USER_EMAIL,
         firstName: 'John',
