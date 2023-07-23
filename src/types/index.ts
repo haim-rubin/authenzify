@@ -53,6 +53,7 @@ export type Services = {
 export type TVerificationDetails = {
   userId: string
   type: string
+  extraInfo?: any
 }
 
 export type TPermission = IPermission

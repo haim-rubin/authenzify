@@ -11,7 +11,12 @@ export class MongoVerificationsService implements IDalVerificationsService {
     this.#modelsCollections = modelsCollections
   }
   delete(id: string): Promise<boolean> {
-    throw new Error('Method not implemented.')
+    return this.#modelsCollections.Verification.updateOne(
+      {
+        _id: id,
+      },
+      { isDeleted: true },
+    )
   }
   findByUserId({
     userId,

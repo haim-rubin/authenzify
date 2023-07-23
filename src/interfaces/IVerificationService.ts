@@ -4,6 +4,7 @@ export interface IVerification {
   userId: string
   type: string
   isDeleted: boolean
+  extraInfo: any
 }
 
 export interface IDalVerificationsService {

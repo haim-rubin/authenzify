@@ -9,5 +9,6 @@ export const UserSchemaDef = {
   password: String,
   salt: String,
   permissions: Array<String>,
+  permissionsGroups: Array<String>,
   tenantId: { type: String, default: null },
 }

@@ -138,5 +138,26 @@ export const initUsersRoutes = ({
         })
       },
     )
+
+    await webServer.get(
+      '/verify/:id/permissions/:role',
+      { preHandler: [authenticated] },
+      function (request, reply) {
+        withErrorHandlingReply({
+          reply,
+          log: this.log,
+        })(async () => {
+          const { id, role } = request.params
+          const userInfo = request.requestContext.get('userInfo')
+          const verified = await usersManagement.verifyUserPermissionRequest({
+            userInfo,
+            verificationId: id,
+            role,
+          })
+
+          reply.send({ verified })
+        })
+      },
+    )
   }
 }

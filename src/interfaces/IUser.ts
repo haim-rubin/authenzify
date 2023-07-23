@@ -8,7 +8,7 @@ export interface IUserBase {
   username: string
   tenantId?: string
   permissions?: string[]
-  permissionsGroups?: IPermissionsGroup[]
+  permissionsGroups?: string[]
 }
 export interface IUserClean extends IUserBase {
   isValid: Boolean

@@ -132,4 +132,11 @@ export class ConfigService {
   get permissionsVerificationRoute() {
     return this.#config.permissionsVerificationRoute
   }
+
+  get approvePermissionsByPermissionsName() {
+    return (
+      this.#config.approvePermissionsByPermissionsName ||
+      'allow-approve-users-permissions'
+    )
+  }
 }

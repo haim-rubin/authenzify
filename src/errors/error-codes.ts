@@ -91,4 +91,24 @@ export const PERMISSIONS_ERRORS = {
     code: 'PERMISSIONS.INVALID_INITIATOR_EMAIL',
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
   },
+  INVALID_ADMIN_EMAIL: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.INVALID_ADMIN_EMAIL',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  INVALID_ACTION: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.INVALID_ACTION',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  USER_NOT_ALLOWED: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.USER_NOT_ALLOWED',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  ROLE_NOT_ALLOWED: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.ROLE_NOT_ALLOWED',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
 }

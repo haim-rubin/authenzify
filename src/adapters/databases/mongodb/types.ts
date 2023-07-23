@@ -21,6 +21,7 @@ export type TModelsCollections = {
     find: Function
     findById: Function
     updateOne: Function
+    delete: Function
   }
   Permission: {
     create: Function
