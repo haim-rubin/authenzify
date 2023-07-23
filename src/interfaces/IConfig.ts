@@ -50,4 +50,5 @@ export interface IConfig {
   usersRoutesPrefix?: string
   onSignUpFirstBasePermissions: string[]
   permissionsGroups: any
+  permissionsVerificationRoute: string
 }

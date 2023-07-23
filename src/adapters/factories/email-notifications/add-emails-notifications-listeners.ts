@@ -24,6 +24,8 @@ export const getEmailNotificationsProvider = async (
             applicationName: configService.applicationName,
             activationVerificationRoute:
               configService.activationVerificationRoute,
+            permissionsVerificationRoute:
+              configService.permissionsVerificationRoute,
           },
         )
 
@@ -57,7 +59,19 @@ export const addEmailsNotificationsListeners = async ({
     })
     usersManagement.onPermissionsRequested(
       async ({ permissionsGroups, verification, user, adminEmail }) => {
-        debugger
+        try {
+          const groupsNames = permissionsGroups.map(({ name }) => name)
+
+          await emailNotifications.sendPermissionsRequestMailToAdmin({
+            groupsNames,
+            verification,
+            user,
+            adminEmail,
+          })
+        } catch (error) {
+          console.error('Failed to send permissions request email')
+          console.error(error)
+        }
       },
     )
   }

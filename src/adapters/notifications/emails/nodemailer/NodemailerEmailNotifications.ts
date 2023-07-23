@@ -22,9 +22,10 @@ export class NodemailerEmailNotifications implements IEmailNotifications {
     iNodemailerEmailSettings: INodemailerEmailSettings,
     constantParams: IConstantParams,
   ) {
-    this.#templatesRender = templates
-    this.#iNodemailerEmailSettings = iNodemailerEmailSettings
-    this.#constantParams = constantParams
+    this.#templatesRender = templates as IEmailTemplatesRender
+    this.#iNodemailerEmailSettings =
+      iNodemailerEmailSettings as INodemailerEmailSettings
+    this.#constantParams = constantParams as IConstantParams
     this.#innerSendMail = initNodemailer(iNodemailerEmailSettings).sendMail
   }
 
@@ -121,5 +122,39 @@ export class NodemailerEmailNotifications implements IEmailNotifications {
     } catch (error) {
       throw error
     }
+  }
+
+  sendPermissionsRequestMailToAdmin({
+    groupsNames,
+    verification,
+    user,
+    adminEmail,
+  }) {
+    const templates = this.#templatesRender.renderPermissionsRequest({
+      from: {
+        from: this.#iNodemailerEmailSettings.from,
+        applicationName: this.#constantParams.applicationName,
+      },
+      subject: {
+        applicationName: this.#constantParams.applicationName,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+      },
+      html: {
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        permissions: groupsNames.map((name) => {
+          return {
+            name,
+            link: this.#constantParams.permissionsVerificationRoute
+              .replace(new RegExp(':id', 'g'), verification.id)
+              .replace(new RegExp(':role', 'g'), name),
+          }
+        }),
+      },
+    })
+    return this.#prepareAndSendEmail(templates, adminEmail)
   }
 }

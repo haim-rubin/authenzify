@@ -128,4 +128,8 @@ export class ConfigService {
   get permissionsGroups() {
     return this.#config.permissionsGroups
   }
+
+  get permissionsVerificationRoute() {
+    return this.#config.permissionsVerificationRoute
+  }
 }

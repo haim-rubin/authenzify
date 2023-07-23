@@ -121,6 +121,11 @@ export const getConfig = async (configOption?: any) => {
             '/subject.ejs',
           ),
         },
+        permissionsRequest: {
+          from: path.join(templatesBasePath, '/activation', '/from.ejs'),
+          html: path.join(templatesBasePath, '/activation', '/body.html'),
+          subject: path.join(templatesBasePath, '/activation', '/subject.ejs'),
+        },
       },
     },
   }
