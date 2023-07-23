@@ -109,7 +109,7 @@ export const initUsersRoutes = ({
         this.log.info(`Verify user by activation id: '${id}'`)
         const verified = await usersManagement.verifyActivation(id)
 
-        reply.send(verified)
+        reply.send({ verified })
       })
     })
 
