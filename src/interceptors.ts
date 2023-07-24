@@ -6,6 +6,7 @@ export const getAuthenticatedInterceptor = ({
   publicKey,
   jwtOptions,
   authorizationCookieKey,
+  defaultError = unauthorizedError,
 }) => {
   const { verifyToken } = initVerifyToken({ publicKey, jwtOptions })
   return {
@@ -14,7 +15,7 @@ export const getAuthenticatedInterceptor = ({
       withErrorHandlingReply({
         reply,
         log: this.log,
-        defaultError: unauthorizedError,
+        defaultError,
       })(() => {
         if (!Authorization) {
           throw new Error(`'${authorizationCookieKey}' is ${Authorization}`)

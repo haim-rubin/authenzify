@@ -1,8 +1,6 @@
 import { IDalPermissionsService } from '../../../interfaces'
 import { TModelsCollections } from '../../databases/mongodb/types'
-import { mapMongoDbId } from './mongodb-util'
 import { IPermission } from '../../../interfaces/IPermissionService'
-import { IPermissionsGroup } from '../../../interfaces/IPermissionGroupService'
 
 export class MongoPermissionsService implements IDalPermissionsService {
   #modelsCollections: TModelsCollections

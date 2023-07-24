@@ -8,7 +8,7 @@ export const withErrorHandling =
     try {
       return await funcToInvoke()
     } catch (error) {
-      log.error(`[!] [withErrorHandling] - Error: ${stringifyError(error)}`)
+      log.error(`[!] [withErrorHandling] - Error: ${JSON.stringify(error)}`)
 
       throw HttpError.isInstanceOf(error) ? error : defaultError
     }
