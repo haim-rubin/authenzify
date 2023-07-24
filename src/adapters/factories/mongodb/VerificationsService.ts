@@ -43,13 +43,14 @@ export class MongoVerificationsService implements IDalVerificationsService {
     return this.#modelsCollections.Verification.find(filter)
   }
 
-  async findOne({ id, type }): Promise<IVerification> {
-    const user = await this.#modelsCollections.Verification.findOne({
+  async findOne({ id, type, isDeleted }): Promise<IVerification> {
+    const verification = await this.#modelsCollections.Verification.findOne({
       id,
       type,
+      isDeleted,
     })
 
-    return user?.toObject()
+    return verification?.toObject()
   }
 
   async create(verification: TVerificationDetails): Promise<IVerification> {

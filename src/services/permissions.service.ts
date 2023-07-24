@@ -121,6 +121,21 @@ export class PermissionsService {
       })
     return permissionsByNames.map(({ _doc }) => _doc)
   }
+
+  async findPermissionsGroupsByNames({
+    tenantId,
+    names,
+  }: {
+    tenantId: string
+    names: string[]
+  }) {
+    const permissionsGroupsByNames =
+      await this.#iDalPermissionsGroupsService.findPermissionsGroupsByNames({
+        tenantId,
+        names,
+      })
+    return permissionsGroupsByNames
+  }
   async findPermissionByName({ name }: { name: string }) {
     const permission = await this.#iDalPermissionsService.findPermissionByName({
       name,

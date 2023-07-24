@@ -13,6 +13,20 @@ export class MongoPermissionsGroupsService
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
+  async findPermissionsGroupsByNames({
+    tenantId,
+    names,
+  }: {
+    tenantId: string
+    names: string[]
+  }): Promise<IPermissionsGroup[]> {
+    const existingPermissionsGroups =
+      await this.#modelsCollections.PermissionsGroup.find({
+        tenantId,
+        name: { $in: names },
+      })
+    return existingPermissionsGroups
+  }
 
   async findGroup({
     id,

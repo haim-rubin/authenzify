@@ -6,6 +6,7 @@ import { cleanUser } from '../util/helpers'
 import { UsersManagement } from '../adapters/business-logic/users-management'
 import { ConfigService } from '../services/config.service'
 import HttpError from '../errors/HttpError'
+import { SIGN_IN_ERRORS } from '../errors/error-codes'
 interface IParams extends RequestGenericInterface {
   id: string
 }
@@ -76,7 +77,9 @@ export const initUsersRoutes = ({
           const { id } = params
           this.log.info(`Get user by id: '${id}'`)
           const user = await usersManagement.getUser({ id })
-
+          if (!user) {
+            throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
+          }
           reply.send(cleanUser(user))
         })
       },
@@ -94,6 +97,9 @@ export const initUsersRoutes = ({
           this.log.info(`Get user 'me' by id: '${id}'`)
 
           const user = await usersManagement.getUser({ id })
+          if (!user) {
+            throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
+          }
           reply.send(cleanUser(user))
         })
       },
@@ -127,14 +133,13 @@ export const initUsersRoutes = ({
 
           const { body: companyDetails } = request
 
-          const requestPermissionForUserResponse =
-            await usersManagement.requestPermissionForUser({
-              companyDetails,
-              userInfo,
-              id,
-            })
+          const emailSent = await usersManagement.requestPermissionForUser({
+            companyDetails,
+            userInfo,
+            id,
+          })
 
-          reply.send(requestPermissionForUserResponse)
+          reply.send({ emailSent })
         })
       },
     )

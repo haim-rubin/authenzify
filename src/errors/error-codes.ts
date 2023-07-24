@@ -111,4 +111,9 @@ export const PERMISSIONS_ERRORS = {
     code: 'PERMISSIONS.ROLE_NOT_ALLOWED',
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
   },
+  USER_DOES_NOT_EXISTS: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.USER_DOES_NOT_EXISTS',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
 }

@@ -39,6 +39,7 @@ import {
   generatePermissionsGroupId,
   generateTenantId,
 } from '../../util/record-id-prefixes'
+import { unique } from '../../util/helpers'
 
 const mapToMinimal = (user: IUserClean): IUserClean => {
   const {
@@ -178,8 +179,7 @@ export class UsersManagement
     return this.#services.Verifications.createVerification(verificationDetails)
   }
 
-  async getUser({ id }: { id: string }): Promise<IUserClean> {
-    const user = await this.#services.Users.findById(id)
+  mapUser(user) {
     const {
       id: uid,
       email,
@@ -206,6 +206,10 @@ export class UsersManagement
       permissionsGroups,
     }
   }
+  async getUser({ id }: { id: string }): Promise<IUserClean> {
+    const user = await this.#services.Users.findById(id)
+    return user ? this.mapUser(user) : user
+  }
 
   async signUp(userDetails: TSignUp): Promise<IUserClean> {
     try {
@@ -217,7 +221,22 @@ export class UsersManagement
       throw error
     }
   }
+  async getUserPermissions({ tenantId, permissions, permissionsGroups }) {
+    const permissionsGroupsFull =
+      await this.#services.Permissions.findPermissionsGroupsByNames({
+        tenantId,
+        names: permissionsGroups,
+      })
+    const permissionsFromGroups = permissionsGroupsFull
+      .map(({ permissions }) => permissions)
+      .flat()
+    const allPermissionsUnique = []
+      .concat(permissionsFromGroups)
+      .concat(permissions)
+      .filter(unique)
 
+    return allPermissionsUnique
+  }
   async innerSignIn(credentials: TSignInEmail): Promise<string> {
     const user = await this.#services.Users.findOne({
       email: credentials.email,
@@ -236,6 +255,8 @@ export class UsersManagement
       isValid,
       isDeleted,
       permissions,
+      tenantId,
+      permissionsGroups,
     } = user
 
     if (isDeleted) {
@@ -256,7 +277,11 @@ export class UsersManagement
     if (!isMatch) {
       throw new HttpError(SIGN_IN_ERRORS.INVALID_USERNAME_OR_PASSWORD)
     }
-
+    const allPermissions = await this.getUserPermissions({
+      tenantId,
+      permissions,
+      permissionsGroups,
+    })
     const token = sign(
       {
         id,
@@ -264,7 +289,8 @@ export class UsersManagement
         firstName,
         lastName,
         username,
-        permissions,
+        tenantId,
+        permissions: allPermissions,
       },
       this.#configService.privateKey,
       this.#configService.jwtSignOptions,
@@ -410,9 +436,10 @@ export class UsersManagement
     const existing = await this.getPermissionsGroups({ tenantId })
     const existingNames = existing.map(({ name }) => name)
     const createPermissionsGroupsResponse = await Promise.all(
-      Object.entries(this.#configService.permissionsGroups)
-        .filter(([name]) => !existingNames.includes(name))
-        .map(([name, permissions]: [string, string[]]) => {
+      Object.entries(this.#configService.permissionsGroups) // Taking roles from config
+        .filter(([name]) => !existingNames.includes(name)) // Filter the existing roles (this for case that application roles already sets and now adding new)
+        .map(([name, { permissions }]: [string, { permissions: string[] }]) => {
+          //Creating the roles that doesn't exists
           return this.addPermissionsGroup({
             id: generatePermissionsGroupId(),
             tenantId,
@@ -456,6 +483,11 @@ export class UsersManagement
         PERMISSIONS_ERRORS.PERMISSION_CANNOT_INITIATE_BY_OTHER_USER,
       )
     }
+
+    if (!user) {
+      throw new HttpError(PERMISSIONS_ERRORS.USER_DOES_NOT_EXISTS)
+    }
+
     if (userInfo.email !== user.email) {
       throw new HttpError(PERMISSIONS_ERRORS.INVALID_INITIATOR_EMAIL)
     }
@@ -473,10 +505,27 @@ export class UsersManagement
   }
   async createUserPermissionsVerification({ id, companyDetails, user }) {
     const userWithTenantId = await this.getUser({ id })
-    const permissionsGroups = await this.getPermissionsGroups({
-      tenantId: userWithTenantId.tenantId,
-      filter: {},
+
+    const verificationExists = await this.#services.Verifications.findByUserId({
+      id,
+      type: VERIFICATION_TYPES.USER_PERMISSIONS_REQUEST,
+      isDeleted: false,
     })
+    if (verificationExists) {
+      ///
+    }
+
+    const highestRoles = Object.entries(this.#configService.permissionsGroups)
+      .filter(([role, value]: [role: string, value: any]) => value?.highest)
+      .map(([name]) => ({ name }))
+
+    const isTheFirstUser = user.email === companyDetails.email
+    const permissionsGroups = isTheFirstUser
+      ? highestRoles
+      : await this.getPermissionsGroups({
+          tenantId: userWithTenantId.tenantId,
+          filter: {},
+        })
 
     const verification = await this.createVerification({
       userId: id,
@@ -511,6 +560,7 @@ export class UsersManagement
       user,
       adminEmail: companyDetails.email,
     })
+    return true
   }
 
   verifyUserPermissionRequest = async ({
@@ -559,7 +609,8 @@ export class UsersManagement
         filter: { name: role },
       })
 
-    await this.#services.Verifications.delete(verificationId)
+    const deleteVerificationResponse =
+      await this.#services.Verifications.delete(verificationId)
 
     const res = await this.#services.Users.updateUser(
       { id: user.id },

@@ -44,6 +44,13 @@ export interface IDalPermissionsGroupsService {
     filter: any
   }): Promise<IPermissionsGroup[]>
   deleteGroup({ id, tenantId }: { id: string; tenantId: string })
+  findPermissionsGroupsByNames({
+    tenantId,
+    names,
+  }: {
+    tenantId: string
+    names: string[]
+  }): Promise<IPermissionsGroup[]>
 }
 
 export interface IPermissionService {}
