@@ -45,7 +45,7 @@ export class MongoVerificationsService implements IDalVerificationsService {
 
   async findOne({ id, type, isDeleted }): Promise<IVerification> {
     const verification = await this.#modelsCollections.Verification.findOne({
-      id,
+      _id: id,
       type,
       isDeleted,
     })

@@ -31,4 +31,8 @@ export class UsersService implements IUsersService {
   async updateUser({ id }: { id }, userDetails: any) {
     return this.#iDalUsersService.updateUser({ id }, userDetails)
   }
+
+  async find(filter): Promise<IUserClean[]> {
+    return this.#iDalUsersService.find(filter)
+  }
 }

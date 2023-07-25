@@ -59,7 +59,7 @@ export class MongoUsersService implements IDalUsersService {
     return mapMongoDbId(user)
   }
 
-  find(filter: any): Promise<[IUser]> {
+  find(filter: any): Promise<[IUserClean]> {
     return this.#modelsCollections.User.find(filter)
   }
 

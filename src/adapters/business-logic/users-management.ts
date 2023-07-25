@@ -227,9 +227,12 @@ export class UsersManagement
         tenantId,
         names: permissionsGroups,
       })
+
     const permissionsFromGroups = permissionsGroupsFull
       .map(({ permissions }) => permissions)
       .flat()
+      .map(({ name }) => name)
+
     const allPermissionsUnique = []
       .concat(permissionsFromGroups)
       .concat(permissions)
@@ -312,7 +315,7 @@ export class UsersManagement
 
   verifyActivation = async (verificationId: string): Promise<boolean> => {
     const verification = await this.#services.Verifications.findOne({
-      _id: verificationId,
+      id: verificationId,
       type: VERIFICATION_TYPES.SIGN_UP,
       isDeleted: false,
     })
@@ -452,31 +455,55 @@ export class UsersManagement
     return createPermissionsGroupsResponse
   }
 
-  combineAllUserPermissions(user) {
+  async combineAllUserPermissions(user) {
     const permissions = user.permissions || []
     const groupPermissions =
       user.permissionsGroups?.map(({ permissions }) => permissions).flat() || []
     return [].concat(permissions).concat(groupPermissions)
   }
 
-  async throwIfNotAllowToApproveUsers({ adminEmail }) {
-    const adminUser = (await this.#services.Users.findOne({
-      email: adminEmail,
-    })) as IUserClean
-
-    if (this.#configService.approvePermissionsByPermissionsName) {
-      const allAdminPermissions = this.combineAllUserPermissions(adminUser)
-
-      const hasTheRightPermissionToApprove = allAdminPermissions.includes(
-        this.#configService.approvePermissionsByPermissionsName,
+  async throwIfNotAllowToApproveUsers({
+    adminUser,
+    user,
+  }: {
+    adminUser: IUserClean
+    user: IUserClean
+  }) {
+    // Case of permission for approve user didn't defined by the application
+    if (!this.#configService.approvePermissionsByPermissionsName) {
+      throw new HttpError(
+        PERMISSIONS_ERRORS.PERMISSION_FOR_APPROVE_USERS_NOT_DEFINED,
       )
-
-      if (!hasTheRightPermissionToApprove) {
-        throw new HttpError(PERMISSIONS_ERRORS.INVALID_ADMIN_EMAIL)
-      }
     }
+
+    const allAdminPermissions = await this.getUserPermissions({
+      tenantId: adminUser.tenantId,
+      permissions: adminUser.permissions,
+      permissionsGroups: adminUser.permissionsGroups,
+    })
+
+    // In case it has the right permissions
+    const hasTheRightPermissionToApprove = allAdminPermissions.includes(
+      this.#configService.approvePermissionsByPermissionsName,
+    )
+
+    if (hasTheRightPermissionToApprove) {
+      return true
+    }
+    // Check the case if this is the first user's (isCompanyOwner) is asking permission,
+    // in this case the user doesn't have yet the permission but he's the company owner user so he can approve himself
+    if (
+      this.doesItAdminApprove({ user, adminEmail: adminUser.email }) &&
+      !adminUser.isCompanyOwner
+    ) {
+      throw new HttpError(
+        PERMISSIONS_ERRORS.PERMISSION_CANNOT_INITIATE_BY_OTHER_USER,
+      )
+    }
+
     return true
   }
+
   throwIfUserIsNotValid({ userInfo, user, id }) {
     if (userInfo.id !== id) {
       throw new HttpError(
@@ -493,47 +520,76 @@ export class UsersManagement
     }
   }
 
+  throwIfAdminUserIsNotValid({ adminUser }) {
+    if (!adminUser || adminUser.isDeleted || !adminUser.isValid) {
+      throw new HttpError(PERMISSIONS_ERRORS.ADMIN_USER_DOES_NOT_EXISTS)
+    }
+    return true
+  }
+
   async initializeNewCompanyPermissions({ id }) {
     // Case is the first user
     const tenantId = generateTenantId()
     await this.createPermissionsGroupsForNewCompany({ tenantId })
-    await this.#services.Users.updateUser({ id }, { tenantId })
+    await this.#services.Users.updateUser(
+      { id },
+      { tenantId, isCompanyOwner: true },
+    )
   }
 
-  userNotBelongsToCompany({ userInfo, adminEmail, user }) {
-    return userInfo.email === adminEmail && !user.tenantId
+  doesItAdminApprove({ user, adminEmail }) {
+    return user.email === adminEmail
   }
-  async createUserPermissionsVerification({ id, companyDetails, user }) {
-    const userWithTenantId = await this.getUser({ id })
+
+  userRegisterAsNewCompany({ adminEmail, user }) {
+    return this.doesItAdminApprove({ user, adminEmail }) && !user.tenantId
+  }
+
+  async getAvailablePermissionsForUser({ user, adminUser }) {
+    const highestRoles = Object.entries(this.#configService.permissionsGroups)
+      .filter(([role, value]: [role: string, value: any]) => value?.highest)
+      .map(([name]) => ({ name }))
+
+    const isTheFirstUser = user.email === adminUser.email
+    if (isTheFirstUser) {
+      return highestRoles
+    }
+    const permissionsGroups = await this.getPermissionsGroups({
+      tenantId: adminUser.tenantId,
+      filter: {},
+    })
+    return permissionsGroups
+  }
+  async createUserPermissionsVerification({ id, adminUser, user }) {
+    const permissionsGroups = await this.getAvailablePermissionsForUser({
+      user,
+      adminUser,
+    })
 
     const verificationExists = await this.#services.Verifications.findByUserId({
       id,
       type: VERIFICATION_TYPES.USER_PERMISSIONS_REQUEST,
       isDeleted: false,
     })
+
     if (verificationExists) {
-      ///
+      await this.#services.Verifications.delete(verificationExists.id)
     }
-
-    const highestRoles = Object.entries(this.#configService.permissionsGroups)
-      .filter(([role, value]: [role: string, value: any]) => value?.highest)
-      .map(([name]) => ({ name }))
-
-    const isTheFirstUser = user.email === companyDetails.email
-    const permissionsGroups = isTheFirstUser
-      ? highestRoles
-      : await this.getPermissionsGroups({
-          tenantId: userWithTenantId.tenantId,
-          filter: {},
-        })
+    const anonymousRoles = Object.entries(this.#configService.permissionsGroups)
+      .filter(
+        ([role, value]: [role: string, value: any]) => value.anonymousRole,
+      )
+      .map(([name]) => name)
 
     const verification = await this.createVerification({
       userId: id,
       type: VERIFICATION_TYPES.USER_PERMISSIONS_REQUEST,
       extraInfo: {
-        adminEmail: companyDetails.email,
+        adminEmail: adminUser.email,
         userEmail: user.email,
-        permissionsGroups: permissionsGroups.map(({ name }) => name),
+        permissionsGroups: permissionsGroups
+          .filter(({ name }) => anonymousRoles.includes(name))
+          .map(({ name }) => name),
       },
     })
     return { verification, permissionsGroups }
@@ -545,14 +601,19 @@ export class UsersManagement
 
     const { email: adminEmail } = companyDetails
 
-    if (this.userNotBelongsToCompany({ userInfo, adminEmail, user })) {
+    const adminUser = (await this.#services.Users.findOne({
+      email: adminEmail,
+    })) as IUserClean
+
+    if (this.userRegisterAsNewCompany({ adminEmail, user })) {
       await this.initializeNewCompanyPermissions({ id })
     } else {
-      await this.throwIfNotAllowToApproveUsers({ adminEmail })
+      await this.throwIfAdminUserIsNotValid({ adminUser })
+      await this.throwIfNotAllowToApproveUsers({ adminUser, user })
     }
 
     const { verification, permissionsGroups } =
-      await this.createUserPermissionsVerification({ id, companyDetails, user })
+      await this.createUserPermissionsVerification({ id, adminUser, user })
 
     emitter.emit(USERS_SERVICE_EVENTS.USER_PERMISSIONS_REQUESTED, {
       permissionsGroups,
@@ -569,7 +630,7 @@ export class UsersManagement
     userInfo,
   }): Promise<boolean> => {
     const verification = await this.#services.Verifications.findOne({
-      _id: verificationId,
+      id: verificationId,
       type: VERIFICATION_TYPES.USER_PERMISSIONS_REQUEST,
       isDeleted: false,
     })
@@ -590,19 +651,20 @@ export class UsersManagement
       throw new HttpError(PERMISSIONS_ERRORS.USER_NOT_ALLOWED)
     }
 
-    if (!permissionsGroups.includes(role)) {
-      throw new HttpError(PERMISSIONS_ERRORS.ROLE_NOT_ALLOWED)
-    }
-
     const user = await this.#services.Users.findOne({ email: userEmail })
 
     if (!user) {
-      throw new HttpError(SIGN_UP_ERRORS.USER_DOES_NOT_EXISTS)
+      throw new HttpError(PERMISSIONS_ERRORS.USER_DOES_NOT_EXISTS)
     }
 
     if (user.isDeleted) {
-      throw new HttpError(SIGN_UP_ERRORS.USER_DOES_NOT_EXISTS)
+      throw new HttpError(PERMISSIONS_ERRORS.USER_DOES_NOT_EXISTS)
     }
+
+    if (!user.isCompanyOwner && !permissionsGroups.includes(role)) {
+      throw new HttpError(PERMISSIONS_ERRORS.ROLE_NOT_ALLOWED)
+    }
+
     const permissionsGroup =
       await this.#services.Permissions.findPermissionsGroups({
         tenantId: user.tenantId,
@@ -616,6 +678,12 @@ export class UsersManagement
       { id: user.id },
       { permissionsGroups: permissionsGroup.map(({ name }) => name) },
     )
+
+    const adminUser = await this.#services.Users.findOne({ email: adminEmail })
+    emitter.emit(USERS_SERVICE_EVENTS.USER_PERMISSIONS_APPROVED, {
+      user,
+      adminUser,
+    })
     return true
   }
 
@@ -647,6 +715,13 @@ export class UsersManagement
     emitter.addListener(
       USERS_SERVICE_EVENTS.USER_PERMISSIONS_REQUESTED,
       onPermissionsRequestedFunction as any,
+    )
+  }
+
+  onPermissionsApproved(onPermissionsApprovedFunction: Function): void {
+    emitter.addListener(
+      USERS_SERVICE_EVENTS.USER_PERMISSIONS_APPROVED,
+      onPermissionsApprovedFunction as any,
     )
   }
   //#endregion Events

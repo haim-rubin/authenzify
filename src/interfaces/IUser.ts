@@ -9,6 +9,7 @@ export interface IUserBase {
   tenantId?: string
   permissions?: string[]
   permissionsGroups?: string[]
+  isCompanyOwner?: boolean
 }
 export interface IUserClean extends IUserBase {
   isValid: Boolean

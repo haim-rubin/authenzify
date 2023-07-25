@@ -3,7 +3,7 @@ export interface IPermissionsGroup {
   id: string
   tenantId: string
   name: string
-  permissions: string[]
+  permissions: Array<any>
   isDeleted: boolean
 }
 

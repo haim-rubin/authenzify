@@ -139,4 +139,8 @@ export class ConfigService {
       'allow-approve-users-permissions'
     )
   }
+
+  get signInRoute() {
+    return this.#config.signInRoute
+  }
 }

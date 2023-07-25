@@ -116,4 +116,14 @@ export const PERMISSIONS_ERRORS = {
     code: 'PERMISSIONS.USER_DOES_NOT_EXISTS',
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
   },
+  ADMIN_USER_DOES_NOT_EXISTS: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.ADMIN_USER_DOES_NOT_EXISTS',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  PERMISSION_FOR_APPROVE_USERS_NOT_DEFINED: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'PERMISSIONS.PERMISSION_FOR_APPROVE_USERS_NOT_DEFINED',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
 }

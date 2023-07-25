@@ -17,6 +17,7 @@ export interface IConfig {
   domain: string
   clientDomain: string
   activationVerificationRoute: string
+  signInRoute: string
   appUrl: string
   onActivationUrl: string
   onForgotPasswordUrl: string

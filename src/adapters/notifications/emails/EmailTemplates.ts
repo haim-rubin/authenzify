@@ -43,6 +43,10 @@ export const loadEmailTemplates = async (
     templates.permissionsRequest,
   )
 
+  const permissionsApprovedToUser = await getTemplatesContentOrReadFile(
+    templates.permissionsApprovedToUser,
+  )
+
   const renderTemplate = (
     templates: IEmailTemplate,
     params: { from: any; subject: any; html: any },
@@ -89,10 +93,19 @@ export const loadEmailTemplates = async (
     return renderTemplate(permissionsRequest, params)
   }
 
+  const renderPermissionsApprovedToUser = (params: {
+    from: any
+    subject: any
+    html: any
+  }): IEmailTemplate => {
+    return renderTemplate(permissionsApprovedToUser, params)
+  }
+
   return {
     renderActivation,
     renderVerification,
     renderForgotPassword,
     renderPermissionsRequest,
+    renderPermissionsApprovedToUser,
   }
 }

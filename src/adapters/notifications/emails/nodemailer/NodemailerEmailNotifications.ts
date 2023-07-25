@@ -157,4 +157,27 @@ export class NodemailerEmailNotifications implements IEmailNotifications {
     })
     return this.#prepareAndSendEmail(templates, adminEmail)
   }
+
+  sendPermissionsApprovedMailToUser({ user, adminUser }) {
+    const templates = this.#templatesRender.renderPermissionsApprovedToUser({
+      from: {
+        from: this.#iNodemailerEmailSettings.from,
+        applicationName: this.#constantParams.applicationName,
+      },
+      subject: {
+        applicationName: this.#constantParams.applicationName,
+        email: adminUser.email,
+        firstName: adminUser.firstName || '',
+        lastName: adminUser.lastName || '',
+      },
+      html: {
+        email: adminUser.email,
+        firstName: adminUser.firstName || '',
+        lastName: adminUser.lastName || '',
+        applicationName: this.#constantParams.applicationName,
+        signInRoute: this.#constantParams.signInRoute,
+      },
+    })
+    return this.#prepareAndSendEmail(templates, user.email)
+  }
 }

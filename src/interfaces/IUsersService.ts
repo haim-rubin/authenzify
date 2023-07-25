@@ -13,7 +13,7 @@ export interface IDalUsersService {
   findOne({ email }: { email: TEmail }): Promise<IUser>
   findById(id: string): Promise<IUser>
   create(user: IUserDetails): Promise<IUserClean>
-  find(filter: any): Promise<[IUser]>
+  find(filter: any): Promise<IUserClean[]>
   verifyUser(user: IUserClean, verification: IVerification): Promise<any>
   updateUser({ id }: { id: string }, userDetails: any)
 }
