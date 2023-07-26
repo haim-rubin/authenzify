@@ -11,5 +11,5 @@ export const UserSchemaDef = {
   permissions: Array<String>,
   permissionsGroups: Array<String>,
   tenantId: { type: String, default: null },
-  isCompanyOwner: { type: Boolean, default: false },
+  doesIsCompanyInitializedUser: { type: Boolean, default: false },
 }

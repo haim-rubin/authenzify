@@ -8,7 +8,7 @@ import {
 } from '../../errors/error-codes'
 import HttpError from '../../errors/HttpError'
 import { USERS_SERVICE_EVENTS } from '../../events/users-service.events'
-import { IUserClean } from '../../interfaces/IUser'
+import { IUser, IUserClean } from '../../interfaces/IUser'
 import { IVerification } from '../../interfaces/IVerificationService'
 import {
   IUserServiceEncryption,
@@ -487,15 +487,9 @@ export class UsersManagement
       this.#configService.approvePermissionsByPermissionsName,
     )
 
-    if (hasTheRightPermissionToApprove) {
-      return true
-    }
-    // Check the case if this is the first user's (isCompanyOwner) is asking permission,
+    // Check the case if this is the first user's (doesIsCompanyInitializedUser) is asking permission,
     // in this case the user doesn't have yet the permission but he's the company owner user so he can approve himself
-    if (
-      this.doesItAdminApprove({ user, adminEmail: adminUser.email }) &&
-      !adminUser.isCompanyOwner
-    ) {
+    if (!hasTheRightPermissionToApprove) {
       throw new HttpError(
         PERMISSIONS_ERRORS.PERMISSION_CANNOT_INITIATE_BY_OTHER_USER,
       )
@@ -531,18 +525,28 @@ export class UsersManagement
     // Case is the first user
     const tenantId = generateTenantId()
     await this.createPermissionsGroupsForNewCompany({ tenantId })
+
     await this.#services.Users.updateUser(
       { id },
-      { tenantId, isCompanyOwner: true },
+      {
+        tenantId,
+        doesIsCompanyInitializedUser: true,
+        $push: {
+          permissions: this.#configService.approvePermissionsByPermissionsName,
+        },
+      },
     )
   }
 
-  doesItAdminApprove({ user, adminEmail }) {
+  doesItTheAdminRequestThePermissions({ user, adminEmail }) {
     return user.email === adminEmail
   }
 
   userRegisterAsNewCompany({ adminEmail, user }) {
-    return this.doesItAdminApprove({ user, adminEmail }) && !user.tenantId
+    return (
+      this.doesItTheAdminRequestThePermissions({ user, adminEmail }) &&
+      !user.tenantId
+    )
   }
 
   async getAvailablePermissionsForUser({ user, adminUser }) {
@@ -560,6 +564,7 @@ export class UsersManagement
     })
     return permissionsGroups
   }
+
   async createUserPermissionsVerification({ id, adminUser, user }) {
     const permissionsGroups = await this.getAvailablePermissionsForUser({
       user,
@@ -588,7 +593,7 @@ export class UsersManagement
         adminEmail: adminUser.email,
         userEmail: user.email,
         permissionsGroups: permissionsGroups
-          .filter(({ name }) => anonymousRoles.includes(name))
+          .filter(({ name }) => !anonymousRoles.includes(name))
           .map(({ name }) => name),
       },
     })
@@ -624,6 +629,27 @@ export class UsersManagement
     return true
   }
 
+  doesTheUserIsValid({ user }: { user: IUser }) {
+    return user && !user.isDeleted && user.isValid
+  }
+
+  doesUserHasTheRightPermissionToApprove({ user }) {
+    const { permissions, permissionsGroups = [] } = user
+    const permissionsFromGroups = Object.entries(
+      this.#configService.permissionsGroups,
+    )
+      .filter(([role]) => permissionsGroups.includes(role))
+      .map(
+        ([_, { permissions }]: [string, { permissions: any }]) => permissions,
+      )
+      .flat()
+      .map(({ name }) => name)
+    return []
+      .concat(permissions)
+      .concat(permissionsFromGroups)
+      .includes(this.#configService.approvePermissionsByPermissionsName)
+  }
+
   verifyUserPermissionRequest = async ({
     verificationId,
     role,
@@ -635,11 +661,7 @@ export class UsersManagement
       isDeleted: false,
     })
 
-    if (!verification) {
-      throw new HttpError(PERMISSIONS_ERRORS.INVALID_ACTION)
-    }
-
-    if (verification.isDeleted) {
+    if (!verification || verification.isDeleted) {
       throw new HttpError(PERMISSIONS_ERRORS.INVALID_ACTION)
     }
 
@@ -647,39 +669,80 @@ export class UsersManagement
       extraInfo: { adminEmail, userEmail, permissionsGroups },
     } = verification
 
-    if (userInfo.email !== adminEmail) {
-      throw new HttpError(PERMISSIONS_ERRORS.USER_NOT_ALLOWED)
-    }
-
     const user = await this.#services.Users.findOne({ email: userEmail })
 
-    if (!user) {
-      throw new HttpError(PERMISSIONS_ERRORS.USER_DOES_NOT_EXISTS)
-    }
-
-    if (user.isDeleted) {
-      throw new HttpError(PERMISSIONS_ERRORS.USER_DOES_NOT_EXISTS)
-    }
-
-    if (!user.isCompanyOwner && !permissionsGroups.includes(role)) {
+    if (!permissionsGroups.includes(role)) {
       throw new HttpError(PERMISSIONS_ERRORS.ROLE_NOT_ALLOWED)
     }
 
+    if (
+      !this.doesTheUserIsValid({
+        user,
+      })
+    ) {
+      throw new HttpError(PERMISSIONS_ERRORS.USER_DOES_NOT_EXISTS)
+    }
+    const isUserAdminRequest = this.doesItTheAdminRequestThePermissions({
+      user,
+      adminEmail,
+    })
+
+    const adminUser = isUserAdminRequest
+      ? user
+      : await this.#services.Users.findOne({
+          email: adminEmail,
+        })
+
+    if (userInfo.id !== adminUser.id) {
+      throw new HttpError(PERMISSIONS_ERRORS.USER_NOT_ALLOWED)
+    }
+
+    // Check if the user that request the permissions doesn't have the right permission to approve
+    if (!this.doesUserHasTheRightPermissionToApprove({ user })) {
+      // If the user doesn't have the permissions so check if the user is also the admin
+      // and if it does the admin so it's the same user and we shouldn't check again the permissions
+      if (isUserAdminRequest) {
+        throw new HttpError(PERMISSIONS_ERRORS.USER_NOT_ALLOWED)
+      } else {
+        // This is for the case the user is not the admin so we need to check if the admin has the permission for approve the user
+
+        // First check existence of the admin user
+        if (
+          !this.doesTheUserIsValid({
+            user: adminUser,
+          })
+        ) {
+          throw new HttpError(PERMISSIONS_ERRORS.ADMIN_USER_DOES_NOT_EXISTS)
+        }
+
+        // Check if the adminUser has the right permission to approve the permissions for the user
+        if (!this.doesUserHasTheRightPermissionToApprove({ user: adminUser })) {
+          throw new HttpError(PERMISSIONS_ERRORS.USER_NOT_ALLOWED)
+        }
+      }
+    }
+
+    // Check if the requested role is exists this for making sure that the user didn't hack for role that it doesn't allow to
     const permissionsGroup =
       await this.#services.Permissions.findPermissionsGroups({
-        tenantId: user.tenantId,
+        tenantId: adminUser.tenantId,
         filter: { name: role },
       })
 
+    if (!permissionsGroup.find(({ name }) => name === role)) {
+      throw new HttpError(PERMISSIONS_ERRORS.ROLE_NOT_ALLOWED)
+    }
     const deleteVerificationResponse =
       await this.#services.Verifications.delete(verificationId)
 
     const res = await this.#services.Users.updateUser(
       { id: user.id },
-      { permissionsGroups: permissionsGroup.map(({ name }) => name) },
+      {
+        tenantId: user.tenantId || adminUser.tenantId, // Need to supports multi tenants
+        permissionsGroups: permissionsGroup.map(({ name }) => name),
+      },
     )
 
-    const adminUser = await this.#services.Users.findOne({ email: adminEmail })
     emitter.emit(USERS_SERVICE_EVENTS.USER_PERMISSIONS_APPROVED, {
       user,
       adminUser,
