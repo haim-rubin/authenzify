@@ -180,4 +180,39 @@ export class NodemailerEmailNotifications implements IEmailNotifications {
     })
     return this.#prepareAndSendEmail(templates, user.email)
   }
+
+  sendResetPasswordMailToUser({
+    user,
+    verification,
+    notRequestedVerification,
+  }) {
+    const templates = this.#templatesRender.renderResetPasswordRequested({
+      from: {
+        from: this.#iNodemailerEmailSettings.from,
+        applicationName: this.#constantParams.applicationName,
+      },
+      subject: {
+        applicationName: this.#constantParams.applicationName,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+      },
+      html: {
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        applicationName: this.#constantParams.applicationName,
+        resetPasswordRoute: this.#constantParams.resetPasswordRoute.replace(
+          new RegExp(':id', 'g'),
+          verification.id,
+        ),
+        didNotAskedToResetPasswordRoute:
+          this.#constantParams.didNotAskedToResetPasswordRoute.replace(
+            new RegExp(':id', 'g'),
+            notRequestedVerification.id,
+          ),
+      },
+    })
+    return this.#prepareAndSendEmail(templates, user.email)
+  }
 }

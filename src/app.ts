@@ -11,7 +11,7 @@ import { initUsersRoutes } from './app-routes/users-routes'
 export const usersService = async (config: IConfig) => {
   const configService = new ConfigService(config)
   const usersManagement: UsersManagement = await factory(configService)
-  const webServer = fastify({ logger: true })
+  const webServer = fastify({ logger: configService.logger })
 
   await webServer.register(cookie)
   await webServer.register(fastifyRequestContext, {

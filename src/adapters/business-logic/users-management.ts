@@ -2,6 +2,8 @@ import { sign, verify } from 'jsonwebtoken'
 
 import { VERIFICATION_TYPES } from '../../constant'
 import {
+  CHANGE_PASSWORD_ERRORS,
+  FORGOT_PASSWORD_ERRORS,
   PERMISSIONS_ERRORS,
   SIGN_IN_ERRORS,
   SIGN_UP_ERRORS,
@@ -342,6 +344,150 @@ export class UsersManagement
     return true
   }
 
+  async changePassword({ password, newPassword, userInfo }) {
+    if (!password?.trim() || !newPassword?.trim()) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.INVALID_PASSWORD_POLICY)
+    }
+
+    const user = await this.#services.Users.findOne({
+      email: userInfo.email,
+    })
+
+    if (!user) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.USER_NOT_EXIST)
+    }
+
+    if (user.isDeleted) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.USER_NOT_EXIST)
+    }
+
+    if (!user.isValid) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.USER_NOT_EXIST)
+    }
+
+    const isMatch = await doesPasswordMatch({
+      password: password,
+      encryptedPassword: user.password,
+      salt: user.salt,
+      passwordPrivateKey: this.#configService.passwordPrivateKey,
+    })
+
+    if (!isMatch) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.INVALID_USERNAME_OR_PASSWORD)
+    }
+
+    const isNewPasswordMatch = await doesPasswordMatch({
+      password: newPassword,
+      encryptedPassword: user.password,
+      salt: user.salt,
+      passwordPrivateKey: this.#configService.passwordPrivateKey,
+    })
+
+    if (isNewPasswordMatch) {
+      throw new HttpError(
+        CHANGE_PASSWORD_ERRORS.CANNOT_CHANGE_TO_THE_EXISTING_PASSWORD,
+      )
+    }
+
+    const passwordPolicyIsValid =
+      await this.#configService.doesPasswordPolicyValid(newPassword)
+
+    if (!passwordPolicyIsValid) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.INVALID_PASSWORD_POLICY)
+    }
+
+    const encryptedPassword = await this.encrypt({ password: newPassword })
+    const updatedUser = await this.#services.Users.updateUser(
+      { id: user.id },
+      encryptedPassword,
+    )
+    return !!updatedUser?.modifiedCount
+  }
+
+  async forgotPassword({ email }) {
+    const user = await this.#services.Users.findOne({
+      email,
+    })
+
+    if (!user) {
+      throw new HttpError(FORGOT_PASSWORD_ERRORS.USER_NOT_EXIST)
+    }
+
+    if (user.isDeleted) {
+      throw new HttpError(FORGOT_PASSWORD_ERRORS.USER_DELETED)
+    }
+
+    if (!user.isValid) {
+      throw new HttpError(FORGOT_PASSWORD_ERRORS.USER_NOT_EXIST)
+    }
+
+    const verification = await this.#services.Verifications.createVerification({
+      userId: user.id,
+      type: VERIFICATION_TYPES.RESET_PASSWORD_REQUEST,
+      extraInfo: {},
+    })
+
+    const notRequestedVerification =
+      await this.#services.Verifications.createVerification({
+        userId: user.id,
+        type: VERIFICATION_TYPES.DID_NOT_REQUESTED_TO_RESET_PASSWORD,
+        extraInfo: {},
+      })
+
+    emitter.emit(USERS_SERVICE_EVENTS.RESET_PASSWORD_REQUESTED, {
+      user,
+      verification,
+      notRequestedVerification,
+    })
+    return true
+  }
+
+  async applyForgotPassword({ verificationId, newPassword }) {
+    const verification = await this.#services.Verifications.findOne({
+      id: verificationId,
+      type: VERIFICATION_TYPES.RESET_PASSWORD_REQUEST,
+      isDeleted: false,
+    })
+
+    if (!verification || verification.isDeleted) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.INVALID_ACTION)
+    }
+
+    const { userId } = verification
+
+    const user = await this.#services.Users.findById(userId)
+
+    if (!user) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.USER_NOT_EXIST)
+    }
+
+    if (user.isDeleted) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.USER_NOT_EXIST)
+    }
+
+    if (!user.isValid) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.USER_NOT_EXIST)
+    }
+
+    const isMatch = await doesPasswordMatch({
+      password: newPassword,
+      encryptedPassword: user.password,
+      salt: user.salt,
+      passwordPrivateKey: this.#configService.passwordPrivateKey,
+    })
+
+    if (isMatch) {
+      throw new HttpError(CHANGE_PASSWORD_ERRORS.INVALID_PASSWORD_POLICY)
+    }
+
+    const encryptedPassword = await this.encrypt({ password: newPassword })
+    const updatedUser = await this.#services.Users.updateUser(
+      { id: user.id },
+      encryptedPassword,
+    )
+    await this.#services.Verifications.delete(verificationId)
+    return !!updatedUser?.modifiedCount
+  }
   //#region Permissions
   async addPermission(permission: TPermission) {
     const createResponse = await this.#services.Permissions.createPermission(
@@ -785,6 +931,13 @@ export class UsersManagement
     emitter.addListener(
       USERS_SERVICE_EVENTS.USER_PERMISSIONS_APPROVED,
       onPermissionsApprovedFunction as any,
+    )
+  }
+
+  onForgotPassword(onForgotPasswordFunction: Function): void {
+    emitter.addListener(
+      USERS_SERVICE_EVENTS.RESET_PASSWORD_REQUESTED,
+      onForgotPasswordFunction as any,
     )
   }
   //#endregion Events

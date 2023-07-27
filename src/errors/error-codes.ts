@@ -47,7 +47,7 @@ export const SIGN_UP_ERRORS = {
   },
   USER_DELETED: {
     httpStatusCode: httpStatus.FORBIDDEN,
-    code: 'SIGN_UP.USER_DELETED',
+    code: 'SIGN_UP.USER_DOES_NOT_EXISTS',
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
   },
   USER_DOES_NOT_EXISTS: {
@@ -75,7 +75,7 @@ export const SIGN_IN_ERRORS = {
   },
   USER_DELETED: {
     httpStatusCode: httpStatus.FORBIDDEN,
-    code: 'SIGN_IN.USER_DELETED',
+    code: 'SIGN_IN.USER_DOES_NOT_EXISTS',
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
   },
 }
@@ -125,5 +125,66 @@ export const PERMISSIONS_ERRORS = {
     httpStatusCode: httpStatus.FORBIDDEN,
     code: 'PERMISSIONS.PERMISSION_FOR_APPROVE_USERS_NOT_DEFINED',
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+}
+
+export const CHANGE_PASSWORD_ERRORS = {
+  USER_NOT_EXIST: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'CHANGE_PASSWORD.USER_NOT_EXIST',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  USER_DELETED: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'CHANGE_PASSWORD.USER_NOT_EXIST',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  CANNOT_CHANGE_TO_THE_EXISTING_PASSWORD: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'CHANGE_PASSWORD.CANNOT_CHANGE_TO_THE_EXISTING_PASSWORD',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  INVALID_USERNAME_OR_PASSWORD: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'CHANGE_PASSWORD.INVALID_USERNAME_OR_PASSWORD',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  INVALID_PASSWORD_POLICY: {
+    httpStatusCode: httpStatus.BAD_REQUEST,
+    code: 'CHANGE_PASSWORD.INVALID_PASSWORD_POLICY',
+    httpStatusText: httpStatus[httpStatus.BAD_REQUEST],
+  },
+  INVALID_ACTION: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'RESET_PASSWORD.INVALID_ACTION',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+}
+
+export const FORGOT_PASSWORD_ERRORS = {
+  USER_NOT_EXIST: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'FORGOT_PASSWORD.USER_NOT_EXIST',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  USER_DELETED: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'FORGOT_PASSWORD.USER_NOT_EXIST',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  CANNOT_CHANGE_TO_THE_EXISTING_PASSWORD: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'FORGOT_PASSWORD.CANNOT_CHANGE_TO_THE_EXISTING_PASSWORD',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  INVALID_USERNAME_OR_PASSWORD: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'FORGOT_PASSWORD.INVALID_USERNAME_OR_PASSWORD',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
+  INVALID_PASSWORD_POLICY: {
+    httpStatusCode: httpStatus.BAD_REQUEST,
+    code: 'FORGOT_PASSWORD.INVALID_PASSWORD_POLICY',
+    httpStatusText: httpStatus[httpStatus.BAD_REQUEST],
   },
 }

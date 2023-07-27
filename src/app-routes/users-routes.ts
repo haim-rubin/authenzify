@@ -164,5 +164,80 @@ export const initUsersRoutes = ({
         })
       },
     )
+
+    await webServer.post(
+      '/change-password',
+      { preHandler: [authenticated] },
+      function (request, reply) {
+        withErrorHandlingReply({
+          reply,
+          log: this.log,
+        })(async () => {
+          const userInfo = request.requestContext.get('userInfo')
+
+          const {
+            body: { password, newPassword },
+          } = request
+
+          const passwordChanged = await usersManagement.changePassword({
+            password,
+            newPassword,
+            userInfo,
+          })
+
+          reply.send({ passwordChanged })
+        })
+      },
+    )
+
+    await webServer.post('/forgot-password', function (request, reply) {
+      withErrorHandlingReply({
+        reply,
+        log: this.log,
+      })(async () => {
+        const {
+          body: { email },
+          log,
+        } = request
+        try {
+          const passwordChanged = await usersManagement.forgotPassword({
+            email,
+          })
+
+          reply.send({ passwordChanged })
+        } catch (error) {
+          log.error(error)
+          reply.send({ passwordChanged: true })
+        }
+      })
+    })
+
+    await webServer.post(
+      '/verify/:verificationId/apply-forgot-password',
+      function (request, reply) {
+        withErrorHandlingReply({
+          reply,
+          log: this.log,
+        })(async () => {
+          const {
+            params,
+            body: { newPassword },
+            log,
+          } = request
+          const { verificationId } = params
+          try {
+            const passwordChanged = await usersManagement.applyForgotPassword({
+              newPassword,
+              verificationId,
+            })
+
+            reply.send({ passwordChanged })
+          } catch (error) {
+            log.error(error)
+            reply.send({ passwordChanged: true })
+          }
+        })
+      },
+    )
   }
 }

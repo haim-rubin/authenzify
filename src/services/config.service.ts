@@ -143,4 +143,17 @@ export class ConfigService {
   get signInRoute() {
     return this.#config.signInRoute
   }
+
+  get logger() {
+    return this.#config.logger === !!this.#config.logger
+      ? this.#config.logger
+      : true
+  }
+
+  get resetPasswordRoute() {
+    return this.#config.resetPasswordRoute
+  }
+  get didNotAskedToResetPasswordRoute() {
+    return this.#config.didNotAskedToResetPasswordRoute
+  }
 }

@@ -53,4 +53,7 @@ export interface IConfig {
   permissionsGroups: any
   permissionsVerificationRoute: string
   approvePermissionsByPermissionsName: string
+  logger?: boolean
+  resetPasswordRoute: string
+  didNotAskedToResetPasswordRoute: string
 }

@@ -126,8 +126,17 @@ export const getConfig = async (configOption?: any) => {
           html: path.join(templatesBasePath, '/activation', '/body.html'),
           subject: path.join(templatesBasePath, '/activation', '/subject.ejs'),
         },
+        permissionsApprovedToUser: {
+          from: path.join(templatesBasePath, '/activation', '/from.ejs'),
+          html: path.join(templatesBasePath, '/activation', '/body.html'),
+          subject: path.join(templatesBasePath, '/activation', '/subject.ejs'),
+        },
       },
     },
+    logger: false,
+    resetPasswordRoute: 'http://localhost:3003/users/verify/:id/reset-password',
+    didNotAskedToResetPasswordRoute:
+      'http://localhost:3003/users/verify/:id/did-not-asked-reset-password',
   }
   return config
 }
