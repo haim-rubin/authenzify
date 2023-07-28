@@ -1,9 +1,10 @@
 import { sign, verify } from 'jsonwebtoken'
 
-import { VERIFICATION_TYPES } from '../../constant'
+import { USER_SIGNED_UP_OR_IN_BY, VERIFICATION_TYPES } from '../../constant'
 import {
   CHANGE_PASSWORD_ERRORS,
   FORGOT_PASSWORD_ERRORS,
+  MISSING_CONFIGURATION,
   PERMISSIONS_ERRORS,
   SIGN_IN_ERRORS,
   SIGN_UP_ERRORS,
@@ -42,6 +43,7 @@ import {
   generateTenantId,
 } from '../../util/record-id-prefixes'
 import { unique } from '../../util/helpers'
+import { googleApisProvider } from '../providers/google'
 
 const mapToMinimal = (user: IUserClean): IUserClean => {
   const {
@@ -78,6 +80,7 @@ export class UsersManagement
 {
   #services: Services
   #configService: ConfigService
+  googleApis: any
   constructor({
     services,
     configService,
@@ -87,6 +90,11 @@ export class UsersManagement
   }) {
     this.#services = services
     this.#configService = configService
+    this.googleApis = this.#configService.googleSignInClientId
+      ? googleApisProvider({
+          GOOGLE_CLIENT_ID: this.#configService.googleSignInClientId,
+        })
+      : null
   }
 
   doesUsernamePolicyValid({ email }: { email: string }): Promise<Boolean> {
@@ -146,6 +154,7 @@ export class UsersManagement
       const user = await this.#services.Users.create({
         ...userDetails,
         ...encryptedPassword,
+        signedUpVia: USER_SIGNED_UP_OR_IN_BY.EMAIL,
         isValid: this.#configService.activateUserAuto,
         permissions: defaultPermissionsSignUp.map(({ name }) => name),
       })
@@ -300,7 +309,13 @@ export class UsersManagement
       this.#configService.privateKey,
       this.#configService.jwtSignOptions,
     )
-
+    await this.#services.Users.updateUser(
+      { id },
+      {
+        lastLogin: new Date().getTime(),
+        signedInVia: USER_SIGNED_UP_OR_IN_BY.EMAIL,
+      },
+    )
     return token
   }
 
@@ -442,6 +457,13 @@ export class UsersManagement
     return true
   }
 
+  doesUserSignedUpWithGoogleAndFirstTimeResetPassword(user) {
+    return (
+      user.signedUpVia === USER_SIGNED_UP_OR_IN_BY.GOOGLE &&
+      !user.password &&
+      !user.salt
+    )
+  }
   async applyForgotPassword({ verificationId, newPassword }) {
     const verification = await this.#services.Verifications.findOne({
       id: verificationId,
@@ -469,15 +491,17 @@ export class UsersManagement
       throw new HttpError(CHANGE_PASSWORD_ERRORS.USER_NOT_EXIST)
     }
 
-    const isMatch = await doesPasswordMatch({
-      password: newPassword,
-      encryptedPassword: user.password,
-      salt: user.salt,
-      passwordPrivateKey: this.#configService.passwordPrivateKey,
-    })
+    if (!this.doesUserSignedUpWithGoogleAndFirstTimeResetPassword(user)) {
+      const isMatch = await doesPasswordMatch({
+        password: newPassword,
+        encryptedPassword: user.password,
+        salt: user.salt,
+        passwordPrivateKey: this.#configService.passwordPrivateKey,
+      })
 
-    if (isMatch) {
-      throw new HttpError(CHANGE_PASSWORD_ERRORS.INVALID_PASSWORD_POLICY)
+      if (isMatch) {
+        throw new HttpError(CHANGE_PASSWORD_ERRORS.INVALID_PASSWORD_POLICY)
+      }
     }
 
     const encryptedPassword = await this.encrypt({ password: newPassword })
@@ -941,6 +965,124 @@ export class UsersManagement
     )
   }
   //#endregion Events
+
+  async innerSignInGoogle(googleEmail: string): Promise<string> {
+    const user = await this.#services.Users.findOne({
+      email: googleEmail,
+    })
+
+    if (!user) {
+      throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
+    }
+
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+      username,
+      isValid,
+      isDeleted,
+      permissions,
+      tenantId,
+      permissionsGroups,
+    } = user
+
+    if (isDeleted) {
+      throw new HttpError(SIGN_IN_ERRORS.USER_DELETED)
+    }
+
+    if (!isValid) {
+      throw new HttpError(SIGN_IN_ERRORS.USER_NOT_VERIFIED)
+    }
+
+    const allPermissions = await this.getUserPermissions({
+      tenantId,
+      permissions,
+      permissionsGroups,
+    })
+    const token = sign(
+      {
+        id,
+        email,
+        firstName,
+        lastName,
+        username,
+        tenantId,
+        permissions: allPermissions,
+      },
+      this.#configService.privateKey,
+      this.#configService.jwtSignOptions,
+    )
+
+    await this.#services.Users.updateUser(
+      { id },
+      {
+        lastLogin: new Date().getTime(),
+        signedInVia: USER_SIGNED_UP_OR_IN_BY.GOOGLE,
+      },
+    )
+
+    return token
+  }
+  async innerSignUpGoogle(googleUser: any): Promise<IUserClean> {
+    try {
+      const defaultPermissionsSignUp =
+        await this.#services.Permissions.findPermissions({ isBase: true })
+      const user = await this.#services.Users.createGoogleUser({
+        ...googleUser,
+
+        permissions: defaultPermissionsSignUp.map(({ name }) => name),
+      })
+
+      const userClean: IUserClean = mapToMinimal(user)
+
+      return userClean
+    } catch (error) {
+      throw error
+    }
+  }
+  async signInGoogle(token: any): Promise<string> {
+    try {
+      if (!this.googleApis) {
+        throw new HttpError(MISSING_CONFIGURATION)
+      }
+      const googleUser = await this.googleApis.verifyClientToken({ token })
+      const userExists = await this.#services.Users.findOne({
+        email: googleUser.email,
+      })
+      if (!userExists) {
+        const { email, firstName, lastName, userVerified } = googleUser
+        const userAfterSignedUpViaGoogleResponse = await this.innerSignUpGoogle(
+          {
+            email,
+            firstName,
+            lastName,
+            isValid: userVerified,
+            isDeleted: false,
+            signedUpVia: USER_SIGNED_UP_OR_IN_BY.GOOGLE,
+            extendedInfo: { googleUser },
+          },
+        )
+
+        emitter.emit(
+          USERS_SERVICE_EVENTS.USER_SIGN_UP_VIA_GOOGLE,
+          userAfterSignedUpViaGoogleResponse,
+        )
+      } else {
+        await this.#services.Users.updateUser(
+          { id: userExists.id },
+          { extendedInfo: { googleUser } },
+        )
+      }
+      const tokenResponse = await this.innerSignInGoogle(googleUser.email)
+      emitter.emit(USERS_SERVICE_EVENTS.USER_SIGN_IN_VIA_GOOGLE, tokenResponse)
+      return tokenResponse
+    } catch (error) {
+      emitter.emit(USERS_SERVICE_EVENTS.USER_SIGN_IN_VIA_GOOGLE_ERROR, error)
+      throw error
+    }
+  }
 }
 
 export const initUsersManagement = async ({

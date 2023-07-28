@@ -34,6 +34,7 @@ export type TPasswordInfo = {
 export interface IUserDetails extends TSignUp, TPasswordInfo {
   isValid: Boolean
   permissions?: string[]
+  signedUpVia: string
 }
 
 export type ServicesEvents = {

@@ -12,4 +12,8 @@ export const UserSchemaDef = {
   permissionsGroups: Array<String>,
   tenantId: { type: String, default: null },
   doesIsCompanyInitializedUser: { type: Boolean, default: false },
+  extendedInfo: Object,
+  lastLogin: Number,
+  signedInVia: String,
+  signedUpVia: String,
 }

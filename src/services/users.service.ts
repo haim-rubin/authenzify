@@ -24,6 +24,10 @@ export class UsersService implements IUsersService {
     return this.#iDalUsersService.create(userDetails)
   }
 
+  async createGoogleUser(userDetails: any) {
+    return this.#iDalUsersService.createGoogleUser(userDetails)
+  }
+
   async findOne({ email }: { email: TEmail }): Promise<IUser> {
     return this.#iDalUsersService.findOne({ email })
   }

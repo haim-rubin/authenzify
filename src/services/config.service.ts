@@ -153,7 +153,12 @@ export class ConfigService {
   get resetPasswordRoute() {
     return this.#config.resetPasswordRoute
   }
+
   get didNotAskedToResetPasswordRoute() {
     return this.#config.didNotAskedToResetPasswordRoute
+  }
+
+  get googleSignInClientId() {
+    return this.#config.googleSignInClientId
   }
 }

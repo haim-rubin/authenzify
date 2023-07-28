@@ -239,5 +239,32 @@ export const initUsersRoutes = ({
         })
       },
     )
+
+    await webServer.post('/sign-in-google', function (request, reply) {
+      withErrorHandlingReply({
+        reply,
+        log: this.log,
+      })(async () => {
+        const { body } = request
+
+        this.log.info(`Sign in user email: '${'userDetails.email'}'`)
+
+        const token = await usersManagement.signInGoogle(body)
+
+        if (!configService.setCookieOnSignIn) {
+          reply.send({ token })
+          return
+        }
+
+        reply
+          .clearCookie(configService.authorizationCookieKey)
+          .setCookie(configService.authorizationCookieKey, token, {
+            path: '/',
+            signed: false,
+            sameSite: true,
+          })
+          .send({ token })
+      })
+    })
   }
 }

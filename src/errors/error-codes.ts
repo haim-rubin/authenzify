@@ -12,6 +12,12 @@ export const UNAUTHORIZED_ERROR = {
   httpStatusText: httpStatus[httpStatus.UNAUTHORIZED],
 }
 
+export const MISSING_CONFIGURATION = {
+  httpStatusCode: httpStatus.BAD_REQUEST,
+  code: `GENERAL.MISSING_CONFIGURATION`,
+  httpStatusText: httpStatus[httpStatus.BAD_REQUEST],
+}
+
 export const SIGN_UP_ERRORS = {
   UNKNOWN_ERROR: {
     httpStatusCode: httpStatus.INTERNAL_SERVER_ERROR,

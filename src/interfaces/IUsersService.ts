@@ -16,6 +16,7 @@ export interface IDalUsersService {
   find(filter: any): Promise<IUserClean[]>
   verifyUser(user: IUserClean, verification: IVerification): Promise<any>
   updateUser({ id }: { id: string }, userDetails: any)
+  createGoogleUser(user: any): Promise<IUserClean>
 }
 
 export interface IUserServiceEncryption {

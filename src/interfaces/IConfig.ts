@@ -56,4 +56,5 @@ export interface IConfig {
   logger?: boolean
   resetPasswordRoute: string
   didNotAskedToResetPasswordRoute: string
+  googleSignInClientId: string
 }

@@ -11,6 +11,9 @@ export class MongoUsersService implements IDalUsersService {
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
+  createGoogleUser(user: any): Promise<IUserClean> {
+    return this.#modelsCollections.User.create(user)
+  }
   async updateUser({ id }, userDetails) {
     const userUpdatedRes = await this.#modelsCollections.User.updateOne(
       { _id: id },

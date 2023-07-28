@@ -10,6 +10,7 @@ export interface IUserBase {
   permissions?: string[]
   permissionsGroups?: string[]
   doesIsCompanyInitializedUser?: boolean
+  extendedInfo?: any
 }
 export interface IUserClean extends IUserBase {
   isValid: Boolean
@@ -20,4 +21,6 @@ export type TIUserClean = IUserBase
 export interface IUser extends IUserClean {
   password: string
   salt: string
+  signedUpVia: string
+  signedInVia: string
 }
