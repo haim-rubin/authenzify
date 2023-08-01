@@ -16,4 +16,5 @@ export const UserSchemaDef = {
   lastLogin: Number,
   signedInVia: String,
   signedUpVia: String,
+  avatarUrl: { type: String, default: null },
 }

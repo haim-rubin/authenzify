@@ -232,6 +232,38 @@ export class UsersManagement
       throw error
     }
   }
+
+  async buildSignInUserInfo({ user }) {
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+      username,
+      permissions,
+      tenantId,
+      permissionsGroups,
+      avatarUrl,
+    } = user
+
+    const allPermissions = await this.getUserPermissions({
+      tenantId,
+      permissions,
+      permissionsGroups,
+    })
+
+    return {
+      id,
+      email,
+      firstName,
+      lastName,
+      username,
+      tenantId,
+      avatarUrl,
+      permissions: allPermissions,
+    }
+  }
+
   async getUserPermissions({ tenantId, permissions, permissionsGroups }) {
     const permissionsGroupsFull =
       await this.#services.Permissions.findPermissionsGroupsByNames({
@@ -291,21 +323,9 @@ export class UsersManagement
     if (!isMatch) {
       throw new HttpError(SIGN_IN_ERRORS.INVALID_USERNAME_OR_PASSWORD)
     }
-    const allPermissions = await this.getUserPermissions({
-      tenantId,
-      permissions,
-      permissionsGroups,
-    })
+    const userInfo = await this.buildSignInUserInfo({ user })
     const token = sign(
-      {
-        id,
-        email,
-        firstName,
-        lastName,
-        username,
-        tenantId,
-        permissions: allPermissions,
-      },
+      userInfo,
       this.#configService.privateKey,
       this.#configService.jwtSignOptions,
     )
@@ -975,18 +995,7 @@ export class UsersManagement
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
     }
 
-    const {
-      id,
-      email,
-      firstName,
-      lastName,
-      username,
-      isValid,
-      isDeleted,
-      permissions,
-      tenantId,
-      permissionsGroups,
-    } = user
+    const { id, isValid, isDeleted } = user
 
     if (isDeleted) {
       throw new HttpError(SIGN_IN_ERRORS.USER_DELETED)
@@ -996,21 +1005,9 @@ export class UsersManagement
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_VERIFIED)
     }
 
-    const allPermissions = await this.getUserPermissions({
-      tenantId,
-      permissions,
-      permissionsGroups,
-    })
+    const userInfo = await this.buildSignInUserInfo({ user })
     const token = sign(
-      {
-        id,
-        email,
-        firstName,
-        lastName,
-        username,
-        tenantId,
-        permissions: allPermissions,
-      },
+      userInfo,
       this.#configService.privateKey,
       this.#configService.jwtSignOptions,
     )
@@ -1062,6 +1059,7 @@ export class UsersManagement
             isDeleted: false,
             signedUpVia: USER_SIGNED_UP_OR_IN_BY.GOOGLE,
             extendedInfo: { googleUser },
+            avatarUrl: googleUser.avatarUrl,
           },
         )
 
@@ -1072,7 +1070,12 @@ export class UsersManagement
       } else {
         await this.#services.Users.updateUser(
           { id: userExists.id },
-          { extendedInfo: { googleUser } },
+          {
+            extendedInfo: { googleUser },
+            avatarUrl: userExists.avatarUrl
+              ? userExists.avatarUrl
+              : googleUser.avatarUrl,
+          },
         )
       }
       const tokenResponse = await this.innerSignInGoogle(googleUser.email)

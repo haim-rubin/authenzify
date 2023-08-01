@@ -11,6 +11,7 @@ export interface IUserBase {
   permissionsGroups?: string[]
   doesIsCompanyInitializedUser?: boolean
   extendedInfo?: any
+  avatarUrl?: string
 }
 export interface IUserClean extends IUserBase {
   isValid: Boolean
