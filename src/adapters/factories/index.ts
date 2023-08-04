@@ -3,7 +3,7 @@ import { UsersService } from '../../services/users.service'
 import { ConfigService } from '../../services/config.service'
 import { Services } from '../../types'
 import { VerificationsService } from '../../services/verifications.service'
-import { PermissionsService } from '../../services/Permissions.service'
+import { PermissionsService } from '../../services/permissions.service'
 import {
   initUsersManagement,
   UsersManagement,
