@@ -292,18 +292,7 @@ export class UsersManagement
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
     }
 
-    const {
-      id,
-      email,
-      firstName,
-      lastName,
-      username,
-      isValid,
-      isDeleted,
-      permissions,
-      tenantId,
-      permissionsGroups,
-    } = user
+    const { id, isValid, isDeleted } = user
 
     if (isDeleted) {
       throw new HttpError(SIGN_IN_ERRORS.USER_DELETED)
@@ -311,6 +300,10 @@ export class UsersManagement
 
     if (!isValid) {
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_VERIFIED)
+    }
+
+    if (!user.password) {
+      throw new HttpError(SIGN_IN_ERRORS.USER_DOES_NOT_HAVE_A_PASSWORD)
     }
 
     const isMatch = await doesPasswordMatch({

@@ -84,6 +84,11 @@ export const SIGN_IN_ERRORS = {
     code: 'SIGN_IN.USER_DOES_NOT_EXISTS',
     httpStatusText: httpStatus[httpStatus.FORBIDDEN],
   },
+  USER_DOES_NOT_HAVE_A_PASSWORD: {
+    httpStatusCode: httpStatus.FORBIDDEN,
+    code: 'SIGN_IN.USER_DOES_NOT_HAVE_A_PASSWORD',
+    httpStatusText: httpStatus[httpStatus.FORBIDDEN],
+  },
 }
 
 export const PERMISSIONS_ERRORS = {
