@@ -19,4 +19,5 @@ export const ACTIVATE_USER_BY = {
 export const USER_SIGNED_UP_OR_IN_BY = Object.freeze({
   EMAIL: 'EMAIL',
   GOOGLE: 'GOOGLE',
+  SYSTEM: 'SYSTEM',
 })

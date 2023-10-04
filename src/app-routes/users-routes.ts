@@ -19,6 +19,22 @@ export const initUsersRoutes = ({
   configService: ConfigService
   authenticated: Function
 }) => {
+  const replyToken = ({ token, reply }, payload = {}) => {
+    if (!configService.setCookieOnSignIn) {
+      reply.send({ ...payload, token })
+      return
+    }
+
+    reply
+      .clearCookie(configService.authorizationCookieKey)
+      .setCookie(configService.authorizationCookieKey, token, {
+        path: '/',
+        signed: false,
+        sameSite: true,
+      })
+      .send({ ...payload, token })
+  }
+
   return async (webServer) => {
     await webServer.post('/sign-up', function (request, reply) {
       withErrorHandlingReply({
@@ -49,19 +65,7 @@ export const initUsersRoutes = ({
 
         const token = await usersManagement.signIn(userDetails as TSignUp)
 
-        if (!configService.setCookieOnSignIn) {
-          reply.send({ token })
-          return
-        }
-
-        reply
-          .clearCookie(configService.authorizationCookieKey)
-          .setCookie(configService.authorizationCookieKey, token, {
-            path: '/',
-            signed: false,
-            sameSite: true,
-          })
-          .send({ token })
+        replyToken({ token, reply })
       })
     })
 
@@ -120,7 +124,7 @@ export const initUsersRoutes = ({
     })
 
     await webServer.post(
-      '/permissions/:id',
+      '/:id/permissions',
       { preHandler: [authenticated] },
       function (request, reply) {
         withErrorHandlingReply({
@@ -133,13 +137,19 @@ export const initUsersRoutes = ({
 
           const { body: companyDetails } = request
 
-          const emailSent = await usersManagement.requestPermissionForUser({
-            companyDetails,
-            userInfo,
-            id,
-          })
+          const { isAdminUser, token } =
+            await usersManagement.requestPermissionForUser({
+              companyDetails,
+              userInfo,
+              id,
+            })
 
-          reply.send({ emailSent })
+          if (isAdminUser) {
+            replyToken({ token, reply }, { isAdminUser, emailSent: false })
+            return
+          }
+
+          reply.send({ emailSent: true, isAdminUser })
         })
       },
     )
@@ -246,24 +256,9 @@ export const initUsersRoutes = ({
         log: this.log,
       })(async () => {
         const { body } = request
-
         this.log.info(`Sign in user email: '${'userDetails.email'}'`)
-
         const token = await usersManagement.signInGoogle(body)
-
-        if (!configService.setCookieOnSignIn) {
-          reply.send({ token })
-          return
-        }
-
-        reply
-          .clearCookie(configService.authorizationCookieKey)
-          .setCookie(configService.authorizationCookieKey, token, {
-            path: '/',
-            signed: false,
-            sameSite: true,
-          })
-          .send({ token })
+        replyToken({ token, reply })
       })
     })
   }

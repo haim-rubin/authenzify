@@ -292,7 +292,7 @@ export class UsersManagement
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
     }
 
-    const { id, isValid, isDeleted } = user
+    const { isValid, isDeleted } = user
 
     if (isDeleted) {
       throw new HttpError(SIGN_IN_ERRORS.USER_DELETED)
@@ -316,19 +316,12 @@ export class UsersManagement
     if (!isMatch) {
       throw new HttpError(SIGN_IN_ERRORS.INVALID_USERNAME_OR_PASSWORD)
     }
-    const userInfo = await this.buildSignInUserInfo({ user })
-    const token = sign(
-      userInfo,
-      this.#configService.privateKey,
-      this.#configService.jwtSignOptions,
-    )
-    await this.#services.Users.updateUser(
-      { id },
-      {
-        lastLogin: new Date().getTime(),
-        signedInVia: USER_SIGNED_UP_OR_IN_BY.EMAIL,
-      },
-    )
+
+    const token = this.loginUser({
+      user,
+      signedInVia: USER_SIGNED_UP_OR_IN_BY.EMAIL,
+    })
+
     return token
   }
 
@@ -719,6 +712,8 @@ export class UsersManagement
         },
       },
     )
+
+    return this.#services.Users.findById(id)
   }
 
   doesItTheAdminRequestThePermissions({ user, adminEmail }) {
@@ -732,15 +727,20 @@ export class UsersManagement
     )
   }
 
-  async getAvailablePermissionsForUser({ user, adminUser }) {
+  getHighestRole = () => {
     const highestRoles = Object.entries(this.#configService.permissionsGroups)
-      .filter(([role, value]: [role: string, value: any]) => value?.highest)
+      .filter(([_, value]: [role: string, value: any]) => value?.highest)
       .map(([name]) => ({ name }))
 
+    return highestRoles
+  }
+
+  async getAvailablePermissionsForUser({ user, adminUser }) {
     const isTheFirstUser = user.email === adminUser.email
     if (isTheFirstUser) {
-      return highestRoles
+      return this.getHighestRole()
     }
+
     const permissionsGroups = await this.getPermissionsGroups({
       tenantId: adminUser.tenantId,
       filter: {},
@@ -764,9 +764,7 @@ export class UsersManagement
       await this.#services.Verifications.delete(verificationExists.id)
     }
     const anonymousRoles = Object.entries(this.#configService.permissionsGroups)
-      .filter(
-        ([role, value]: [role: string, value: any]) => value.anonymousRole,
-      )
+      .filter(([_, value]: [role: string, value: any]) => value.anonymousRole)
       .map(([name]) => name)
 
     const verification = await this.createVerification({
@@ -794,7 +792,30 @@ export class UsersManagement
     })) as IUserClean
 
     if (this.userRegisterAsNewCompany({ adminEmail, user })) {
-      await this.initializeNewCompanyPermissions({ id })
+      const updatedAdminUser = await this.initializeNewCompanyPermissions({
+        id,
+      })
+
+      if (this.#configService.skipFirstCompanyUserSelectsRoleByEmail) {
+        const highestRoles = this.getHighestRole()
+        const [role] = highestRoles
+        await this.setRequestedPermissions({
+          adminUser: updatedAdminUser,
+          user: updatedAdminUser,
+          role: role.name,
+        })
+
+        const updateUserWithPermissions = (await this.#services.Users.findOne({
+          email: adminEmail,
+        })) as IUserClean
+
+        const token = await this.loginUser({
+          user: updateUserWithPermissions,
+          signedInVia: USER_SIGNED_UP_OR_IN_BY.SYSTEM,
+        })
+
+        return { token, isAdminUser: true }
+      }
     } else {
       await this.throwIfAdminUserIsNotValid({ adminUser })
       await this.throwIfNotAllowToApproveUsers({ adminUser, user })
@@ -809,7 +830,7 @@ export class UsersManagement
       user,
       adminEmail: companyDetails.email,
     })
-    return true
+    return { isAdminUser: false, token: null }
   }
 
   doesTheUserIsValid({ user }: { user: IUser }) {
@@ -831,6 +852,27 @@ export class UsersManagement
       .concat(permissions)
       .concat(permissionsFromGroups)
       .includes(this.#configService.approvePermissionsByPermissionsName)
+  }
+
+  setRequestedPermissions = async ({ adminUser, user, role }) => {
+    const permissionsGroup =
+      await this.#services.Permissions.findPermissionsGroups({
+        tenantId: adminUser.tenantId,
+        filter: { name: role },
+      })
+
+    if (!permissionsGroup.find(({ name }) => name === role)) {
+      throw new HttpError(PERMISSIONS_ERRORS.ROLE_NOT_ALLOWED)
+    }
+
+    const res = await this.#services.Users.updateUser(
+      { id: user.id },
+      {
+        tenantId: user.tenantId || adminUser.tenantId, // Need to supports multi tenants
+        permissionsGroups: permissionsGroup.map(({ name }) => name),
+      },
+    )
+    return res
   }
 
   verifyUserPermissionRequest = async ({
@@ -906,25 +948,9 @@ export class UsersManagement
     }
 
     // Check if the requested role is exists this for making sure that the user didn't hack for role that it doesn't allow to
-    const permissionsGroup =
-      await this.#services.Permissions.findPermissionsGroups({
-        tenantId: adminUser.tenantId,
-        filter: { name: role },
-      })
-
-    if (!permissionsGroup.find(({ name }) => name === role)) {
-      throw new HttpError(PERMISSIONS_ERRORS.ROLE_NOT_ALLOWED)
-    }
+    await this.setRequestedPermissions({ adminUser, user, role })
     const deleteVerificationResponse =
       await this.#services.Verifications.delete(verificationId)
-
-    const res = await this.#services.Users.updateUser(
-      { id: user.id },
-      {
-        tenantId: user.tenantId || adminUser.tenantId, // Need to supports multi tenants
-        permissionsGroups: permissionsGroup.map(({ name }) => name),
-      },
-    )
 
     emitter.emit(USERS_SERVICE_EVENTS.USER_PERMISSIONS_APPROVED, {
       user,
@@ -979,6 +1005,25 @@ export class UsersManagement
   }
   //#endregion Events
 
+  loginUser = async ({ user, signedInVia }) => {
+    const userInfo = await this.buildSignInUserInfo({ user })
+    const token = sign(
+      userInfo,
+      this.#configService.privateKey,
+      this.#configService.jwtSignOptions,
+    )
+
+    await this.#services.Users.updateUser(
+      { id: user.id },
+      {
+        lastLogin: new Date().getTime(),
+        signedInVia,
+      },
+    )
+
+    return token
+  }
+
   async innerSignInGoogle(googleEmail: string): Promise<string> {
     const user = await this.#services.Users.findOne({
       email: googleEmail,
@@ -988,7 +1033,7 @@ export class UsersManagement
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_EXIST)
     }
 
-    const { id, isValid, isDeleted } = user
+    const { isValid, isDeleted } = user
 
     if (isDeleted) {
       throw new HttpError(SIGN_IN_ERRORS.USER_DELETED)
@@ -998,23 +1043,14 @@ export class UsersManagement
       throw new HttpError(SIGN_IN_ERRORS.USER_NOT_VERIFIED)
     }
 
-    const userInfo = await this.buildSignInUserInfo({ user })
-    const token = sign(
-      userInfo,
-      this.#configService.privateKey,
-      this.#configService.jwtSignOptions,
-    )
-
-    await this.#services.Users.updateUser(
-      { id },
-      {
-        lastLogin: new Date().getTime(),
-        signedInVia: USER_SIGNED_UP_OR_IN_BY.GOOGLE,
-      },
-    )
+    const token = this.loginUser({
+      user,
+      signedInVia: USER_SIGNED_UP_OR_IN_BY.GOOGLE,
+    })
 
     return token
   }
+
   async innerSignUpGoogle(googleUser: any): Promise<IUserClean> {
     try {
       const defaultPermissionsSignUp =

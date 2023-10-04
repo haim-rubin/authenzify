@@ -161,4 +161,8 @@ export class ConfigService {
   get googleSignInClientId() {
     return this.#config.googleSignInClientId
   }
+
+  get skipFirstCompanyUserSelectsRoleByEmail() {
+    return this.#config.skipFirstCompanyUserSelectsRoleByEmail
+  }
 }

@@ -57,4 +57,5 @@ export interface IConfig {
   resetPasswordRoute: string
   didNotAskedToResetPasswordRoute: string
   googleSignInClientId: string
+  skipFirstCompanyUserSelectsRoleByEmail: boolean
 }
