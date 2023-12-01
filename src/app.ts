@@ -19,9 +19,18 @@ export const usersService = async (config: IConfig) => {
       userInfo: { id: 'system' },
     },
   })
-  const { authenticated } = getAuthenticatedInterceptor(config)
+  const { publicKey, jwtOptions, authorizationCookieKey } = config
+  const { tryToExtractUserAuthenticated } = getAuthenticatedInterceptor({
+    publicKey,
+    jwtOptions,
+    authorizationCookieKey,
+  })
   webServer.register(
-    initUsersRoutes({ usersManagement, configService, authenticated }),
+    initUsersRoutes({
+      usersManagement,
+      configService,
+      tryToExtractUserAuthenticated,
+    }),
     { prefix: configService.usersRoutesPrefix },
   )
   webServer.listen(

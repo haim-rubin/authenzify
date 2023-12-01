@@ -7,17 +7,20 @@ import { UsersManagement } from '../adapters/business-logic/users-management'
 import { ConfigService } from '../services/config.service'
 import HttpError from '../errors/HttpError'
 import { SIGN_IN_ERRORS } from '../errors/error-codes'
+import httpStatus = require('http-status')
 interface IParams extends RequestGenericInterface {
   id: string
 }
+type TryToExtractUserAuthenticatedFunction = (request: any) => any
+
 export const initUsersRoutes = ({
   usersManagement,
   configService,
-  authenticated,
+  tryToExtractUserAuthenticated,
 }: {
   usersManagement: UsersManagement
   configService: ConfigService
-  authenticated: Function
+  tryToExtractUserAuthenticated: TryToExtractUserAuthenticatedFunction
 }) => {
   const replyToken = ({ token, reply }, payload = {}) => {
     if (!configService.setCookieOnSignIn) {
@@ -33,6 +36,18 @@ export const initUsersRoutes = ({
         sameSite: true,
       })
       .send({ ...payload, token })
+  }
+
+  const validateAuthentication = async (request: any, reply: any) => {
+    try {
+      const userInfo = await tryToExtractUserAuthenticated(request)
+      request.requestContext.set('userInfo', userInfo)
+    } catch (error) {
+      reply
+        .status(httpStatus.UNAUTHORIZED)
+        .send({ message: httpStatus[httpStatus.UNAUTHORIZED] })
+      return reply
+    }
   }
 
   return async (webServer) => {
@@ -71,7 +86,9 @@ export const initUsersRoutes = ({
 
     await webServer.get(
       '/:id',
-      { preHandler: [authenticated] },
+      {
+        preHandler: [validateAuthentication],
+      },
       function (request, reply) {
         withErrorHandlingReply({
           reply,
@@ -91,7 +108,7 @@ export const initUsersRoutes = ({
 
     await webServer.get(
       '/me',
-      { preHandler: [authenticated] },
+      { preHandler: [validateAuthentication] },
       function (request, reply) {
         withErrorHandlingReply({
           reply,
@@ -125,7 +142,7 @@ export const initUsersRoutes = ({
 
     await webServer.post(
       '/:id/permissions',
-      { preHandler: [authenticated] },
+      { preHandler: [validateAuthentication] },
       function (request, reply) {
         withErrorHandlingReply({
           reply,
@@ -156,7 +173,7 @@ export const initUsersRoutes = ({
 
     await webServer.get(
       '/verify/:id/permissions/:role',
-      { preHandler: [authenticated] },
+      { preHandler: [validateAuthentication] },
       function (request, reply) {
         withErrorHandlingReply({
           reply,
@@ -177,7 +194,7 @@ export const initUsersRoutes = ({
 
     await webServer.post(
       '/change-password',
-      { preHandler: [authenticated] },
+      { preHandler: [validateAuthentication] },
       function (request, reply) {
         withErrorHandlingReply({
           reply,
