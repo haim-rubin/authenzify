@@ -42,7 +42,7 @@ export const getConfig = async (configOption?: any) => {
   })
   const envParsed = parseEnv(env)
   const templatesBasePath = path.join(__dirname, './templates/email')
-  cleanQuotes
+
   const { GMAIL_PASSWORD, GMAIL_USER } = envParsed
 
   const config: IConfig = {
