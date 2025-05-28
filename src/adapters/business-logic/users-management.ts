@@ -1073,7 +1073,7 @@ export class UsersManagement
       if (!this.googleApis) {
         throw new HttpError(MISSING_CONFIGURATION)
       }
-      const googleUser = await this.googleApis.verifyClientToken({ token })
+      const googleUser = await this.googleApis.verifyClientToken(token)
       const userExists = await this.#services.Users.findOne({
         email: googleUser.email,
       })
