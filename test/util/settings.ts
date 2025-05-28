@@ -41,11 +41,21 @@ export const getConfig = async (configOption?: any) => {
     encoding: 'ascii',
   })
   const envParsed = parseEnv(env)
+  Object.entries(envParsed).forEach(([key, value]: [string, any]) => {
+    process.env[key] = process.env[key] || value
+  })
+
   const templatesBasePath = path.join(__dirname, './templates/email')
 
   const { GMAIL_PASSWORD, GMAIL_USER } = envParsed
 
   const config: IConfig = {
+    onSignUpFirstBasePermissions: [
+      'sign-up-editor',
+      'sign-in-editor',
+      'change-password-editor',
+      'change-password-viewer',
+    ],
     clientDomain: 'http://localhost:9090',
     applicationName: 'Authenzify',
     activationVerificationRoute:
@@ -111,8 +121,22 @@ export const getConfig = async (configOption?: any) => {
             '/subject.ejs',
           ),
         },
+        permissionsRequest: {
+          from: path.join(templatesBasePath, '/activation', '/from.ejs'),
+          html: path.join(templatesBasePath, '/activation', '/body.html'),
+          subject: path.join(templatesBasePath, '/activation', '/subject.ejs'),
+        },
+        permissionsApprovedToUser: {
+          from: path.join(templatesBasePath, '/activation', '/from.ejs'),
+          html: path.join(templatesBasePath, '/activation', '/body.html'),
+          subject: path.join(templatesBasePath, '/activation', '/subject.ejs'),
+        },
       },
     },
+    logger: false,
+    resetPasswordRoute: 'http://localhost:3003/users/verify/:id/reset-password',
+    didNotAskedToResetPasswordRoute:
+      'http://localhost:3003/users/verify/:id/did-not-asked-reset-password',
   }
   return config
 }

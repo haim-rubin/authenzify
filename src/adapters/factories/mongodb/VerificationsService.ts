@@ -1,7 +1,6 @@
-import { IUser, IDalUsersService } from '../../../interfaces'
-import { TUserDetails, TVerificationDetails } from '../../../types'
-import { IUserClean, IVerification } from '../../../interfaces/IUser'
-import { IDalVerificationsService } from '../../../interfaces/IUsersService'
+import { TVerificationDetails } from '../../../types'
+import { IVerification } from '../../../interfaces/IVerificationService'
+import { IDalVerificationsService } from '../../../interfaces/IVerificationService'
 import { TModelsCollections } from '../../databases/mongodb/types'
 import { mapMongoDbId } from './mongodb-util'
 
@@ -12,7 +11,12 @@ export class MongoVerificationsService implements IDalVerificationsService {
     this.#modelsCollections = modelsCollections
   }
   delete(id: string): Promise<boolean> {
-    throw new Error('Method not implemented.')
+    return this.#modelsCollections.Verification.updateOne(
+      {
+        _id: id,
+      },
+      { isDeleted: true },
+    )
   }
   findByUserId({
     userId,
@@ -39,13 +43,14 @@ export class MongoVerificationsService implements IDalVerificationsService {
     return this.#modelsCollections.Verification.find(filter)
   }
 
-  async findOne({ id, type }): Promise<IVerification> {
-    const user = await this.#modelsCollections.Verification.findOne({
-      id,
+  async findOne({ id, type, isDeleted }): Promise<IVerification> {
+    const verification = await this.#modelsCollections.Verification.findOne({
+      _id: id,
       type,
+      isDeleted,
     })
 
-    return user?.toObject()
+    return verification?.toObject()
   }
 
   async create(verification: TVerificationDetails): Promise<IVerification> {

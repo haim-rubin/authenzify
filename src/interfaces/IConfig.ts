@@ -17,6 +17,7 @@ export interface IConfig {
   domain: string
   clientDomain: string
   activationVerificationRoute: string
+  signInRoute: string
   appUrl: string
   onActivationUrl: string
   onForgotPasswordUrl: string
@@ -47,4 +48,14 @@ export interface IConfig {
     settings: IEmailSettings
     emailTemplates: IEmailTemplates
   }
+  usersRoutesPrefix?: string
+  onSignUpFirstBasePermissions: string[]
+  permissionsGroups: any
+  permissionsVerificationRoute: string
+  approvePermissionsByPermissionsName: string
+  logger?: boolean
+  resetPasswordRoute: string
+  didNotAskedToResetPasswordRoute: string
+  googleSignInClientId: string
+  skipFirstCompanyUserSelectsRoleByEmail: boolean
 }

@@ -109,4 +109,60 @@ export class ConfigService {
   get activationVerificationRoute() {
     return this.#config.activationVerificationRoute
   }
+
+  get usersRoutesPrefix() {
+    return this.#config.usersRoutesPrefix || '/v1/users'
+  }
+
+  get host() {
+    return this.#config.host || '0.0.0.0'
+  }
+  get port() {
+    return this.#config.port || 9090
+  }
+
+  get defaultPermissionsSignUp() {
+    return this.#config.onSignUpFirstBasePermissions || []
+  }
+
+  get permissionsGroups() {
+    return this.#config.permissionsGroups
+  }
+
+  get permissionsVerificationRoute() {
+    return this.#config.permissionsVerificationRoute
+  }
+
+  get approvePermissionsByPermissionsName() {
+    return (
+      this.#config.approvePermissionsByPermissionsName ||
+      'allow-approve-users-permissions'
+    )
+  }
+
+  get signInRoute() {
+    return this.#config.signInRoute
+  }
+
+  get logger() {
+    return this.#config.logger === !!this.#config.logger
+      ? this.#config.logger
+      : true
+  }
+
+  get resetPasswordRoute() {
+    return this.#config.resetPasswordRoute
+  }
+
+  get didNotAskedToResetPasswordRoute() {
+    return this.#config.didNotAskedToResetPasswordRoute
+  }
+
+  get googleSignInClientId() {
+    return this.#config.googleSignInClientId
+  }
+
+  get skipFirstCompanyUserSelectsRoleByEmail() {
+    return this.#config.skipFirstCompanyUserSelectsRoleByEmail
+  }
 }

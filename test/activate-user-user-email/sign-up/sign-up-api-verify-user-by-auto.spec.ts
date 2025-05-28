@@ -23,7 +23,10 @@ describe('Sign up', async () => {
       const { USER_EMAIL, USER_PASSWORD } = process.env
       const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
 
-      const res = await server.inject().post('/users/sign-up').body(credentials)
+      const res = await server
+        .inject()
+        .post('/v1/users/sign-up')
+        .body(credentials)
       const { statusCode } = res
       const msg = res.json()
 

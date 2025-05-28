@@ -14,13 +14,13 @@ import { UsersManagement } from '../../../src/adapters/business-logic/users-mana
 
 describe('Sign In', () => {
   let usersManagement: UsersManagement
-  const { USER_EMAIL, USER_PASSWORD } = process.env
-  const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
-
+  let credentials
   before(async () => {
     const config = await getConfig({
       activateUserBy: ACTIVATE_USER_BY.USER_EMAIL,
     })
+    const { USER_EMAIL, USER_PASSWORD } = process.env
+    credentials = { email: USER_EMAIL, password: USER_PASSWORD }
     const storageConfig = config.storage
     await dropDatabase(storageConfig)
     const configService = new ConfigService(config)

@@ -11,11 +11,11 @@ import { ACTIVATE_USER_BY } from '../../../src/constant'
 describe('Sign up', async () => {
   let server
   let config: IConfig
-  const { USER_EMAIL, USER_PASSWORD } = process.env
-  const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
-
+  let credentials
   before(async () => {
     config = await getConfig({ port: 9191 })
+    const { USER_EMAIL, USER_PASSWORD } = process.env
+    credentials = { email: USER_EMAIL, password: USER_PASSWORD }
     const storageConfig = config.storage
     await dropDatabase(storageConfig)
     const configService = new ConfigService(config)
@@ -26,7 +26,10 @@ describe('Sign up', async () => {
 
   describe(`Verify user by '${ACTIVATE_USER_BY.AUTO}'`, () => {
     it('Should test sign up for verify authorization token', async () => {
-      const res = await server.inject().post('/users/sign-in').body(credentials)
+      const res = await server
+        .inject()
+        .post('/v1/users/sign-in')
+        .body(credentials)
 
       const { token } = res.json()
       const cookie = res.cookies.find(({ name, value }) => {

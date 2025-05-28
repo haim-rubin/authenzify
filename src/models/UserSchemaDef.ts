@@ -8,4 +8,13 @@ export const UserSchemaDef = {
   isDeleted: { type: Boolean, default: false },
   password: String,
   salt: String,
+  permissions: Array<String>,
+  permissionsGroups: Array<String>,
+  tenantId: { type: String, default: null },
+  doesIsCompanyInitializedUser: { type: Boolean, default: false },
+  extendedInfo: Object,
+  lastLogin: Number,
+  signedInVia: String,
+  signedUpVia: String,
+  avatarUrl: { type: String, default: null },
 }

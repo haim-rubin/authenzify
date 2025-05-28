@@ -1,5 +1,5 @@
 import { IUser } from '../../../../interfaces'
-import { IVerification } from '../../../../interfaces/IUser'
+import { IVerification } from '../../../../interfaces/IVerificationService'
 import { initNodemailer } from '../email-providers/nodemailer'
 import { IEmailNotifications } from '../IEmailNotifications'
 
@@ -22,9 +22,10 @@ export class NodemailerEmailNotifications implements IEmailNotifications {
     iNodemailerEmailSettings: INodemailerEmailSettings,
     constantParams: IConstantParams,
   ) {
-    this.#templatesRender = templates
-    this.#iNodemailerEmailSettings = iNodemailerEmailSettings
-    this.#constantParams = constantParams
+    this.#templatesRender = templates as IEmailTemplatesRender
+    this.#iNodemailerEmailSettings =
+      iNodemailerEmailSettings as INodemailerEmailSettings
+    this.#constantParams = constantParams as IConstantParams
     this.#innerSendMail = initNodemailer(iNodemailerEmailSettings).sendMail
   }
 
@@ -121,5 +122,97 @@ export class NodemailerEmailNotifications implements IEmailNotifications {
     } catch (error) {
       throw error
     }
+  }
+
+  sendPermissionsRequestMailToAdmin({
+    groupsNames,
+    verification,
+    user,
+    adminEmail,
+  }) {
+    const templates = this.#templatesRender.renderPermissionsRequest({
+      from: {
+        from: this.#iNodemailerEmailSettings.from,
+        applicationName: this.#constantParams.applicationName,
+      },
+      subject: {
+        applicationName: this.#constantParams.applicationName,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+      },
+      html: {
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        permissions: groupsNames.map((name) => {
+          return {
+            name,
+            link: this.#constantParams.permissionsVerificationRoute
+              .replace(new RegExp(':id', 'g'), verification.id)
+              .replace(new RegExp(':role', 'g'), name),
+          }
+        }),
+      },
+    })
+    return this.#prepareAndSendEmail(templates, adminEmail)
+  }
+
+  sendPermissionsApprovedMailToUser({ user, adminUser }) {
+    const templates = this.#templatesRender.renderPermissionsApprovedToUser({
+      from: {
+        from: this.#iNodemailerEmailSettings.from,
+        applicationName: this.#constantParams.applicationName,
+      },
+      subject: {
+        applicationName: this.#constantParams.applicationName,
+        email: adminUser.email,
+        firstName: adminUser.firstName || '',
+        lastName: adminUser.lastName || '',
+      },
+      html: {
+        email: adminUser.email,
+        firstName: adminUser.firstName || '',
+        lastName: adminUser.lastName || '',
+        applicationName: this.#constantParams.applicationName,
+        signInRoute: this.#constantParams.signInRoute,
+      },
+    })
+    return this.#prepareAndSendEmail(templates, user.email)
+  }
+
+  sendResetPasswordMailToUser({
+    user,
+    verification,
+    notRequestedVerification,
+  }) {
+    const templates = this.#templatesRender.renderResetPasswordRequested({
+      from: {
+        from: this.#iNodemailerEmailSettings.from,
+        applicationName: this.#constantParams.applicationName,
+      },
+      subject: {
+        applicationName: this.#constantParams.applicationName,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+      },
+      html: {
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        applicationName: this.#constantParams.applicationName,
+        resetPasswordRoute: this.#constantParams.resetPasswordRoute.replace(
+          new RegExp(':id', 'g'),
+          verification.id,
+        ),
+        didNotAskedToResetPasswordRoute:
+          this.#constantParams.didNotAskedToResetPasswordRoute.replace(
+            new RegExp(':id', 'g'),
+            notRequestedVerification.id,
+          ),
+      },
+    })
+    return this.#prepareAndSendEmail(templates, user.email)
   }
 }

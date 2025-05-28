@@ -8,6 +8,8 @@ export interface IEmailTemplates {
   activation: IEmailTemplate
   onVerification: IEmailTemplate
   forgotPassword: IEmailTemplate
+  permissionsRequest: IEmailTemplate
+  permissionsApprovedToUser: IEmailTemplate
 }
 
 export interface IEmailTemplatesRender {
@@ -26,6 +28,21 @@ export interface IEmailTemplatesRender {
     subject: any
     html: any
   }): IEmailTemplate
+  renderPermissionsRequest(params: {
+    from: any
+    subject: any
+    html: any
+  }): IEmailTemplate
+  renderPermissionsApprovedToUser(params: {
+    from: any
+    subject: any
+    html: any
+  }): IEmailTemplate
+  renderResetPasswordRequested(params: {
+    from: any
+    subject: any
+    html: any
+  }): IEmailTemplate
 }
 
 export interface IConstantParams {
@@ -33,6 +50,10 @@ export interface IConstantParams {
   applicationName: string
   clientDomain: string
   activationVerificationRoute: string
+  permissionsVerificationRoute: string
+  signInRoute: string
+  resetPasswordRoute: string
+  didNotAskedToResetPasswordRoute: string
 }
 
 export interface IEmailInfo extends IEmailTemplate {

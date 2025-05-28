@@ -16,16 +16,17 @@ describe('Sign In', () => {
   let usersManagements
 
   let config: IConfig
-  const { USER_EMAIL, USER_PASSWORD } = process.env
-  const credentials = { email: USER_EMAIL, password: USER_PASSWORD }
-
+  let credentials
   before(async () => {
     config = await getConfig()
+    const { USER_EMAIL, USER_PASSWORD } = process.env
+    credentials = { email: USER_EMAIL, password: USER_PASSWORD }
     const storageConfig = config.storage
     await dropDatabase(storageConfig)
     const configService = new ConfigService(config)
 
     usersManagements = await factory(configService)
+
     await usersManagements.signUp({
       ...credentials,
       firstName: 'John',

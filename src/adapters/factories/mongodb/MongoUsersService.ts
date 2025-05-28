@@ -1,6 +1,7 @@
 import { IUser, IDalUsersService } from '../../../interfaces'
-import { TUserDetails } from '../../../types'
-import { IUserClean, IVerification } from '../../../interfaces/IUser'
+import { IUserDetails } from '../../../types'
+import { IUserClean } from '../../../interfaces/IUser'
+import { IVerification } from '../../../interfaces/IVerificationService'
 import { TModelsCollections } from '../../databases/mongodb/types'
 import { mapMongoDbId } from './mongodb-util'
 
@@ -10,6 +11,17 @@ export class MongoUsersService implements IDalUsersService {
   constructor(modelsCollections: TModelsCollections) {
     this.#modelsCollections = modelsCollections
   }
+  createGoogleUser(user: any): Promise<IUserClean> {
+    return this.#modelsCollections.User.create(user)
+  }
+  async updateUser({ id }, userDetails) {
+    const userUpdatedRes = await this.#modelsCollections.User.updateOne(
+      { _id: id },
+      userDetails,
+    )
+
+    return userUpdatedRes
+  }
   async verifyUser(
     user: IUserClean,
     verification: IVerification,
@@ -17,7 +29,6 @@ export class MongoUsersService implements IDalUsersService {
     const session = await this.#modelsCollections.connection.startSession()
 
     try {
-      // await session.withTransaction(async () => {
       const userUpdatedRes = await this.#modelsCollections.User.updateOne(
         { _id: user.id },
         { isValid: true },
@@ -51,7 +62,7 @@ export class MongoUsersService implements IDalUsersService {
     return mapMongoDbId(user)
   }
 
-  find(filter: any): Promise<[IUser]> {
+  find(filter: any): Promise<[IUserClean]> {
     return this.#modelsCollections.User.find(filter)
   }
 
@@ -65,8 +76,17 @@ export class MongoUsersService implements IDalUsersService {
   }
 
   map(user: any): IUserClean {
-    const { id, email, firstName, lastName, username, isValid, isDeleted } =
-      mapMongoDbId(user)
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+      username,
+      isValid,
+      isDeleted,
+      permissions,
+      permissionsGroups,
+    } = mapMongoDbId(user)
 
     return {
       email,
@@ -76,10 +96,12 @@ export class MongoUsersService implements IDalUsersService {
       username,
       isValid,
       isDeleted,
+      permissions,
+      permissionsGroups,
     }
   }
 
-  async create(userDetails: TUserDetails): Promise<IUserClean> {
+  async create(userDetails: IUserDetails): Promise<IUserClean> {
     const user = await this.#modelsCollections.User.create(userDetails)
     return this.map(user.toObject())
   }

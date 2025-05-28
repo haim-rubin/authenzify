@@ -39,6 +39,18 @@ export const loadEmailTemplates = async (
     templates.forgotPassword,
   )
 
+  const permissionsRequest = await getTemplatesContentOrReadFile(
+    templates.permissionsRequest,
+  )
+
+  const permissionsApprovedToUser = await getTemplatesContentOrReadFile(
+    templates.permissionsApprovedToUser,
+  )
+
+  const resetPassword = await getTemplatesContentOrReadFile(
+    templates.forgotPassword,
+  )
+
   const renderTemplate = (
     templates: IEmailTemplate,
     params: { from: any; subject: any; html: any },
@@ -77,9 +89,36 @@ export const loadEmailTemplates = async (
     return renderTemplate(forgotPassword, params)
   }
 
+  const renderPermissionsRequest = (params: {
+    from: any
+    subject: any
+    html: any
+  }): IEmailTemplate => {
+    return renderTemplate(permissionsRequest, params)
+  }
+
+  const renderPermissionsApprovedToUser = (params: {
+    from: any
+    subject: any
+    html: any
+  }): IEmailTemplate => {
+    return renderTemplate(permissionsApprovedToUser, params)
+  }
+
+  const renderResetPasswordRequested = (params: {
+    from: any
+    subject: any
+    html: any
+  }): IEmailTemplate => {
+    return renderTemplate(resetPassword, params)
+  }
+
   return {
     renderActivation,
     renderVerification,
     renderForgotPassword,
+    renderPermissionsRequest,
+    renderPermissionsApprovedToUser,
+    renderResetPasswordRequested,
   }
 }

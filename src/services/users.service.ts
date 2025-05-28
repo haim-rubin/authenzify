@@ -1,6 +1,7 @@
-import { IUser, IUserClean, IVerification } from '../interfaces/IUser'
+import { IUser, IUserClean } from '../interfaces/IUser'
+import { IVerification } from '../interfaces/IVerificationService'
 import { IUsersService, IDalUsersService } from '../interfaces'
-import { TUserDetails, TEmail, TSignInEmail, TSignUp } from '../types'
+import { IUserDetails, TEmail } from '../types'
 import { ConfigService } from './config.service'
 
 export class UsersService implements IUsersService {
@@ -19,11 +20,23 @@ export class UsersService implements IUsersService {
     return this.#iDalUsersService.verifyUser(user, verification)
   }
 
-  async create(userDetails: TUserDetails) {
+  async create(userDetails: IUserDetails) {
     return this.#iDalUsersService.create(userDetails)
+  }
+
+  async createGoogleUser(userDetails: any) {
+    return this.#iDalUsersService.createGoogleUser(userDetails)
   }
 
   async findOne({ email }: { email: TEmail }): Promise<IUser> {
     return this.#iDalUsersService.findOne({ email })
+  }
+
+  async updateUser({ id }: { id }, userDetails: any) {
+    return this.#iDalUsersService.updateUser({ id }, userDetails)
+  }
+
+  async find(filter): Promise<IUserClean[]> {
+    return this.#iDalUsersService.find(filter)
   }
 }
